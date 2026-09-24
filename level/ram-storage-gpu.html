@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAM والتخزين وGPU ببساطة</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F5F9;--card:#fff;--ink:#1B2440;--mut:#5B6683;--line:#DCE3EE;--ac:#0E8A78;--acs:#DDF4EF;--bad:#C2410C}
+@media(prefers-color-scheme:dark){:root{--bg:#0F1524;--card:#182036;--ink:#E8ECF6;--mut:#9AA6C2;--line:#2A3552;--ac:#3FD0B8;--acs:#173B3A;--bad:#FB923C}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.9 "IBM Plex Sans Arabic",Tahoma,sans-serif}
+main{max-width:760px;margin:0 auto;padding:44px 20px 80px}
+h1{font-size:clamp(32px,6.5vw,52px);line-height:1.3;margin:0 0 12px;font-weight:700}
+h2{font-size:28px;margin:56px 0 6px;font-weight:700}
+p{margin:0 0 14px;max-width:62ch}
+.lead{font-size:20px;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0}
+.tag{display:inline-block;background:var(--acs);color:var(--ac);border-radius:8px;padding:0 10px;font-weight:600;font-size:15px}
+input[type=range]{width:100%;accent-color:var(--ac);margin:10px 0}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:4px 16px;cursor:pointer}
+button[aria-pressed=true],button.go{background:var(--ac);border-color:var(--ac);color:#fff}
+button:focus-visible,input:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.bar{height:18px;background:var(--acs);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);transition:width .3s,background .3s}
+.big{font-size:20px;font-weight:700;margin:12px 0 0}
+.warn{border-right:4px solid var(--ac);background:var(--acs);border-radius:10px;padding:12px 16px;margin:16px 0}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{text-align:right;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:600;font-size:15px}
+tr:last-child td{border:0}
+.grids{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:8px}
+.g i{aspect-ratio:1;background:var(--acs);border-radius:3px}
+.g i.on{background:var(--ac)}
+ul{padding-right:22px;margin:0}
+a{color:var(--ac);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<h1>RAM والتخزين وكرت الشاشة ببساطة</h1>
+<p class="lead">ثلاثة أجزاء يخلط الناس بينها كثيراً. لنفهمها من خلال مكتب عمل: سطح المكتب، والخزانة، وفريق الرسامين.</p>
+
+<h2>الذاكرة العشوائية (RAM)</h2>
+<p><span class="tag">RAM = سطح مكتبك</span> كل برنامج مفتوح يضع أوراقه عليه. كلما كان المكتب أوسع، فتحت برامج أكثر دون بطء. وعند إطفاء الجهاز يُمسح المكتب بالكامل.</p>
+<div class="card">
+  <p style="margin-bottom:0">اختر حجم الـ RAM، ثم افتح برامج (نفترض أن كل برنامج يستهلك 2 GB):</p>
+  <div class="btns" id="sizes"></div>
+  <input type="range" id="apps" min="1" max="12" value="3" aria-label="عدد البرامج المفتوحة">
+  <div class="bar"><i id="bar"></i></div>
+  <p class="big" id="out"></p>
+</div>
+
+<h2>التخزين (Storage)</h2>
+<p><span class="tag">التخزين = الخزانة</span> يحفظ ملفاتك والنظام وألعابك حتى بعد إطفاء الجهاز. لا يُستعمل للعمل المباشر، بل تُسحب منه الأوراق إلى المكتب عند الحاجة.</p>
+<div class="card tw">
+<table>
+  <tr><th>النوع</th><th>السرعة التقريبية</th><th>يبقى بعد الإطفاء؟</th><th>سعة شائعة</th></tr>
+  <tr><td><b>RAM</b></td><td>عشرات GB/ث</td><td>لا</td><td>8 – 32 GB</td></tr>
+  <tr><td><b>SSD</b></td><td>0.5 – 7 GB/ث</td><td>نعم</td><td>256 GB – 2 TB</td></tr>
+  <tr><td><b>HDD</b></td><td>0.1 – 0.2 GB/ث</td><td>نعم</td><td>1 – 4 TB</td></tr>
+</table>
+</div>
+<div class="warn">أسرع ترقية لجهاز بطيء غالباً هي الانتقال من HDD إلى SSD: يفتح النظام والبرامج في ثوانٍ.</div>
+
+<h2>كرت الشاشة (GPU)</h2>
+<p><span class="tag">GPU = فريق رسامين</span> المعالج كأستاذ عبقري يحلّ مسألة صعبة واحدة في كل مرة. أما كرت الشاشة فآلاف الرسامين البسطاء يلوّنون آلاف النقاط معاً. لهذا يتفوق في الرسوم والألعاب والذكاء الاصطناعي.</p>
+<div class="card">
+  <div class="grids">
+    <div><b>المعالج</b> (أنوية قليلة)<div class="g" id="g1"></div></div>
+    <div><b>كرت الشاشة</b> (أنوية كثيرة)<div class="g" id="g2"></div></div>
+  </div>
+  <div class="btns" style="margin:16px 0 0"><button class="go" id="race">ابدأ التلوين</button></div>
+</div>
+<p>الرسم توضيحي فقط لفكرة العمل المتوازي، وليس قياساً حقيقياً للسرعة.</p>
+<ul>
+  <li><b>كرت مدمج:</b> داخل المعالج ويشارك الـ RAM. يكفي للمكتب والفيديو.</li>
+  <li><b>كرت مخصص:</b> قطعة مستقلة لها ذاكرتها الخاصة VRAM. للألعاب الثقيلة والمونتاج والتصميم ثلاثي الأبعاد.</li>
+</ul>
+
+<h2>ماذا تحتاج؟</h2>
+<div class="card">
+  <ul>
+    <li><b>مكتبي وتصفّح:</b> 8 GB RAM، وSSD، وكرت مدمج.</li>
+    <li><b>ألعاب:</b> 16 GB RAM، وSSD، وكرت مخصص.</li>
+    <li><b>مونتاج وتصميم:</b> 16 – 32 GB RAM، وSSD كبير، وكرت مخصص بـ VRAM جيد.</li>
+  </ul>
+</div>
+<p>الجزء السابق: <a href="cpu-for-beginners.html">المعالج CPU ببساطة</a></p>
+</main>
+<script>
+let ram=8;const S=[4,8,16,32],$=id=>document.getElementById(id),
+sz=$('sizes'),ap=$('apps'),bar=$('bar'),out=$('out');
+S.forEach(v=>{const b=document.createElement('button');b.textContent=v+' GB';b.onclick=()=>{ram=v;upd()};sz.appendChild(b)});
+function upd(){
+  [...sz.children].forEach((b,i)=>b.setAttribute('aria-pressed',S[i]===ram));
+  const n=+ap.value,used=n*2,full=used>ram;
+  bar.style.width=Math.min(100,used/ram*100)+'%';
+  bar.style.background=full?'var(--bad)':'var(--ac)';
+  out.textContent=n+' برامج مفتوحة ← '+used+' GB من '+ram+' GB. '+(full?'المكتب ممتلئ: الجهاز ينقل أوراقاً من وإلى التخزين، فيصبح بطيئاً.':'المكتب يتسع، والجهاز يعمل بسلاسة.');
+}
+ap.oninput=upd;upd();
+const g1=$('g1'),g2=$('g2');
+for(let i=0;i<64;i++){g1.appendChild(document.createElement('i'));g2.appendChild(document.createElement('i'))}
+let tm;
+$('race').onclick=()=>{
+  clearInterval(tm);let a=0,b=0;
+  [...g1.children,...g2.children].forEach(x=>x.className='');
+  tm=setInterval(()=>{
+    for(let k=0;k<2&&a<64;k++)g1.children[a++].className='on';
+    for(let k=0;k<16&&b<64;k++)g2.children[b++].className='on';
+    if(a>=64)clearInterval(tm);
+  },120);
+};
+</script>
+</body>
+</html>
