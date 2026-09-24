@@ -1,382 +1,89 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شرح CPU للمبتدئين</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Tahoma, sans-serif;
-            background: #f5f7fb;
-            color: #1e293b;
-            line-height: 1.9;
-        }
-
-        header {
-            background: #1e40af;
-            color: white;
-            text-align: center;
-            padding: 50px 20px;
-        }
-
-        header h1 {
-            margin: 0 0 10px;
-            font-size: 38px;
-        }
-
-        header p {
-            margin: 0;
-            font-size: 18px;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            padding: 30px 20px;
-        }
-
-        .section {
-            background: white;
-            padding: 30px;
-            margin-bottom: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.06);
-        }
-
-        h2 {
-            color: #1d4ed8;
-            margin-top: 0;
-        }
-
-        h3 {
-            color: #334155;
-        }
-
-        .info {
-            background: #eff6ff;
-            border-right: 5px solid #2563eb;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-
-        .example {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .card {
-            padding: 20px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .card h3 {
-            color: #2563eb;
-        }
-
-        ul {
-            padding-right: 25px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 25px;
-            color: #64748b;
-        }
-
-        @media (max-width: 700px) {
-            header h1 {
-                font-size: 28px;
-            }
-
-            .cards {
-                grid-template-columns: 1fr;
-            }
-
-            .section {
-                padding: 20px;
-            }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>المعالج CPU ببساطة</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F5F9;--card:#fff;--ink:#1B2440;--mut:#5B6683;--line:#DCE3EE;--ac:#2A5BD7;--acs:#E4ECFF}
+@media(prefers-color-scheme:dark){:root{--bg:#0F1524;--card:#182036;--ink:#E8ECF6;--mut:#9AA6C2;--line:#2A3552;--ac:#7A9BFF;--acs:#1F2C55}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.9 "IBM Plex Sans Arabic",Tahoma,sans-serif}
+main{max-width:760px;margin:0 auto;padding:44px 20px 80px}
+h1{font-size:clamp(34px,7vw,56px);line-height:1.3;margin:0 0 12px;font-weight:700}
+h2{font-size:28px;margin:56px 0 6px;font-weight:700}
+p{margin:0 0 14px;max-width:62ch}
+.lead{font-size:20px;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0}
+.tag{display:inline-block;background:var(--acs);color:var(--ac);border-radius:8px;padding:0 10px;font-weight:600;font-size:15px}
+input[type=range]{width:100%;accent-color:var(--ac);margin:10px 0}
+.cooks{font-size:28px;min-height:44px;letter-spacing:4px}
+.bar{height:14px;background:var(--acs);border-radius:7px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ac);border-radius:7px;transition:width .3s}
+.big{font-size:22px;font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.two .card{margin:0}
+.warn{border-right:4px solid var(--ac);background:var(--acs);border-radius:10px;padding:12px 16px;margin:16px 0}
+.row{display:grid;grid-template-columns:70px 1fr 90px;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border:0}
+.row b{font-size:20px}
+.row small{color:var(--mut);display:block;line-height:1.6}
+.t{text-align:left;color:var(--mut);font-size:15px;white-space:nowrap}
+ul{padding-right:22px;margin:0}
+a{color:var(--ac);font-weight:600}
+@media(max-width:560px){.two{grid-template-columns:1fr}.row{grid-template-columns:52px 1fr}.t{grid-column:2;text-align:right}}
+</style>
 </head>
-
 <body>
+<main>
+<h1>المعالج (CPU) ببساطة</h1>
+<p class="lead">المعالج هو العقل المدبّر للجهاز: ينفّذ كل تعليمة يطلبها منه أي برنامج. لنفهمه من خلال مطبخ مطعم، فيه ثلاثة أشياء تهمّك: الأنوية، والسرعة، والكاش.</p>
 
-<header>
-    <h1>شرح CPU للمبتدئين</h1>
-    <p>فهم Cores و GHz و Cache بطريقة بسيطة</p>
-</header>
-
-<div class="container">
-
-    <!-- CPU -->
-    <section class="section">
-        <h2>🧠 ما هو CPU؟</h2>
-
-        <p>
-            CPU اختصار لـ
-            <strong>Central Processing Unit</strong>
-            أي وحدة المعالجة المركزية.
-        </p>
-
-        <p>
-            يعتبر الـ CPU من أهم أجزاء الكمبيوتر، لأنه مسؤول عن
-            تنفيذ التعليمات والعمليات التي تطلبها البرامج ونظام التشغيل.
-        </p>
-
-        <div class="info">
-            <strong>ببساطة:</strong>
-            يمكنك تخيل الـ CPU على أنه العقل الذي يقوم بمعالجة الأوامر
-            وتنفيذ العمليات داخل الكمبيوتر.
-        </div>
-
-        <div class="example">
-            <strong>مثال:</strong>
-            عندما تفتح برنامجًا أو تشغل لعبة، يقوم المعالج بتنفيذ
-            التعليمات المطلوبة لتشغيل البرنامج.
-        </div>
-    </section>
-
-
-    <!-- Cores -->
-    <section class="section">
-        <h2>⚙️ ما هي Cores؟</h2>
-
-        <p>
-            كلمة <strong>Core</strong> تعني نواة.
-            والنواة هي وحدة داخل المعالج تستطيع تنفيذ التعليمات.
-        </p>
-
-        <p>
-            لذلك عندما نقول إن المعالج يحتوي على:
-        </p>
-
-        <ul>
-            <li>2 Cores → يحتوي على نواتين.</li>
-            <li>4 Cores → يحتوي على أربع أنوية.</li>
-            <li>8 Cores → يحتوي على ثماني أنوية.</li>
-        </ul>
-
-        <div class="cards">
-
-            <div class="card">
-                <h3>2 Cores</h3>
-                <p>نواتان لمعالجة المهام.</p>
-            </div>
-
-            <div class="card">
-                <h3>4 Cores</h3>
-                <p>أربع أنوية لمعالجة المهام.</p>
-            </div>
-
-            <div class="card">
-                <h3>8 Cores</h3>
-                <p>ثماني أنوية لمعالجة المهام.</p>
-            </div>
-
-        </div>
-
-        <div class="info">
-            <strong>تشبيه بسيط:</strong>
-            تخيل أن لديك عمالًا في شركة.
-            كلما زاد عدد العمال، يمكن توزيع بعض المهام بينهم.
-            نفس الفكرة بشكل مبسط مع أنوية المعالج.
-        </div>
-    </section>
-
-
-    <!-- GHz -->
-    <section class="section">
-        <h2>⚡ ما معنى GHz؟</h2>
-
-        <p>
-            GHz اختصار لـ <strong>Gigahertz</strong>.
-            ويستخدم للتعبير عن تردد تشغيل المعالج.
-        </p>
-
-        <p>
-            على سبيل المثال:
-        </p>
-
-        <div class="example">
-            <strong>3.0 GHz</strong>
-            <p>
-                يعني أن تردد تشغيل المعالج هو 3.0 جيجاهرتز.
-            </p>
-        </div>
-
-        <div class="info">
-            <strong>مهم:</strong>
-            لا يمكن تحديد قوة المعالج من GHz فقط.
-            هناك عوامل أخرى مثل المعمارية وعدد الأنوية وحجم Cache
-            وغيرها.
-        </div>
-
-        <h3>هل 4 GHz أفضل دائمًا من 3 GHz؟</h3>
-
-        <p>
-            ليس بالضرورة.
-            عند مقارنة معالجين، يجب النظر إلى تصميم المعالج
-            وأدائه الفعلي بالإضافة إلى التردد.
-        </p>
-    </section>
-
-
-    <!-- Cache -->
-    <section class="section">
-        <h2>🚀 ما هي Cache؟</h2>
-
-        <p>
-            Cache هي ذاكرة صغيرة وسريعة جدًا يستخدمها المعالج
-            لتخزين البيانات والتعليمات التي يحتاج إليها بشكل متكرر.
-        </p>
-
-        <div class="info">
-            <strong>تشبيه بسيط:</strong>
-            تخيل أن لديك عاملًا.
-            الـ CPU هو العامل،
-            والـ Cache عبارة عن مكتب صغير بجانب العامل يحتوي
-            على الأدوات التي يستخدمها باستمرار.
-        </div>
-
-        <p>
-            وجود البيانات المهمة في Cache يساعد المعالج على الوصول
-            إليها بسرعة بدلًا من الاعتماد على ذاكرة أبعد مثل RAM في كل مرة.
-        </p>
-    </section>
-
-
-    <!-- Cache Levels -->
-    <section class="section">
-        <h2>📦 أنواع Cache</h2>
-
-        <div class="cards">
-
-            <div class="card">
-                <h3>L1 Cache</h3>
-                <p>
-                    صغيرة جدًا وسريعة جدًا،
-                    وتكون قريبة جدًا من النواة.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>L2 Cache</h3>
-                <p>
-                    أكبر من L1 عادةً،
-                    وسريعة أيضًا.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>L3 Cache</h3>
-                <p>
-                    أكبر عادةً من L1 وL2،
-                    وقد تكون مشتركة بين عدة أنوية.
-                </p>
-            </div>
-
-        </div>
-    </section>
-
-
-    <!-- How everything works -->
-    <section class="section">
-        <h2>🔗 كيف تعمل Cores وGHz وCache معًا؟</h2>
-
-        <p>
-            تخيل أن لديك معالجًا بالمواصفات التالية:
-        </p>
-
-        <div class="example">
-            <strong>8 Cores — 4.0 GHz — 16MB Cache</strong>
-        </div>
-
-        <ul>
-            <li>
-                <strong>8 Cores:</strong>
-                يحتوي المعالج على 8 أنوية.
-            </li>
-
-            <li>
-                <strong>4.0 GHz:</strong>
-                تردد تشغيل المعالج يصل إلى 4.0 GHz
-                حسب ظروف التشغيل والمواصفات.
-            </li>
-
-            <li>
-                <strong>16MB Cache:</strong>
-                يحتوي على مقدار محدد من الذاكرة السريعة Cache.
-            </li>
-        </ul>
-
-        <div class="info">
-            <strong>الخلاصة:</strong>
-            لا تنظر إلى رقم واحد فقط عند مقارنة المعالجات.
-            الأداء يعتمد على مجموعة من العوامل وليس GHz أو عدد الأنوية وحدهما.
-        </div>
-    </section>
-
-
-    <!-- Summary -->
-    <section class="section">
-        <h2>📌 الخلاصة</h2>
-
-        <div class="cards">
-
-            <div class="card">
-                <h3>CPU</h3>
-                <p>
-                    المسؤول عن تنفيذ التعليمات ومعالجة البيانات.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>Cores</h3>
-                <p>
-                    أنوية المعالجة الموجودة داخل المعالج.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>GHz</h3>
-                <p>
-                    مقياس لتردد تشغيل المعالج.
-                </p>
-            </div>
-
-        </div>
-
-        <div class="info">
-            <strong>Cache:</strong>
-            ذاكرة سريعة تساعد المعالج في الوصول إلى البيانات
-            والتعليمات التي يحتاج إليها بشكل متكرر.
-        </div>
-    </section>
-
+<h2>الأنوية (Cores)</h2>
+<p><span class="tag">النواة = طاهٍ واحد</span> معالج بأربع أنوية يعني أربعة طهاة يعملون في وقت واحد.</p>
+<div class="card">
+  <p>عندك 8 أطباق، وكل طاهٍ يحتاج 4 دقائق لإنهاء طبق. غيّر عدد الطهاة:</p>
+  <input type="range" id="cores" min="1" max="8" value="1" aria-label="عدد الأنوية">
+  <div class="cooks" id="cooks"></div>
+  <div class="bar"><i id="bar"></i></div>
+  <p class="big" id="out" style="margin:12px 0 0"></p>
 </div>
+<p>الطهاة الإضافيون يفيدون فقط إذا أمكن تقسيم العمل بينهم. تصفّح صفحة ويب بسيطة يستفيد قليلاً، أما تصدير فيديو أو لعبة حديثة فيستفيدان كثيراً.</p>
+<p>أما كلمة Threads فتعني أن النواة الواحدة تتعامل مع مهمتين بذكاء، كطاهٍ يقلّب قدراً وهو ينتظر الفرن.</p>
 
-<footer>
-    شرح CPU للمبتدئين
-</footer>
+<h2>السرعة (GHz)</h2>
+<p><span class="tag">GHz = سرعة يد الطاهي</span> يقيس عدد الدورات التي تنفّذها النواة في الثانية. المعالج بسرعة 3.5 GHz ينفّذ 3.5 مليار دورة في الثانية.</p>
+<div class="two">
+  <div class="card"><b>أنوية أكثر</b><br>عدد أكبر من المهام في نفس الوقت.</div>
+  <div class="card"><b>GHz أعلى</b><br>كل مهمة تنتهي أسرع.</div>
+</div>
+<div class="warn">لا تقارن GHz بين معالجين من جيلين أو شركتين مختلفتين. طاهٍ حديث أذكى قد ينجز في الدورة الواحدة أكثر من طاهٍ قديم أسرع حركة.</div>
 
+<h2>الكاش (Cache)</h2>
+<p><span class="tag">الكاش = ما تضعه على طاولتك</span> ذاكرة صغيرة جداً وسريعة جداً داخل المعالج. الطاهي لا يذهب إلى المخزن مع كل رشة ملح، فيُبقي الأشياء التي يستعملها كثيراً قريبة منه.</p>
+<div class="card">
+  <div class="row"><b>L1</b><div>طاولتك مباشرة<small>أصغر وأسرع، لكل نواة كاش خاص بها</small></div><div class="t">≈ 1 نانوثانية</div></div>
+  <div class="row"><b>L2</b><div>الرف بجانبك<small>أكبر قليلاً وأبطأ قليلاً</small></div><div class="t">≈ 4 نانوثانية</div></div>
+  <div class="row"><b>L3</b><div>ثلاجة المطبخ<small>مشتركة بين كل الطهاة</small></div><div class="t">≈ 15 نانوثانية</div></div>
+  <div class="row"><b>RAM</b><div>مخزن المطعم<small>واسع جداً لكنه أبعد بكثير</small></div><div class="t">≈ 80 نانوثانية</div></div>
+</div>
+<p>الأرقام تقريبية وتختلف من معالج لآخر، لكن الفكرة ثابتة: كلما كان الشيء أقرب كان أسرع وأصغر حجماً. وكلما زاد الكاش، قلّت رحلات المعالج إلى المخزن، وهذا يفيد الألعاب والبرمجة خصوصاً.</p>
+
+<h2>كيف تختار؟</h2>
+<div class="card">
+  <ul>
+    <li><b>تصفّح ومهام مكتبية:</b> 4 إلى 6 أنوية تكفي.</li>
+    <li><b>ألعاب:</b> سرعة النواة الواحدة مهمة، مع 6 إلى 8 أنوية وكاش جيد.</li>
+    <li><b>مونتاج وبرمجة وتصميم:</b> أنوية أكثر وكاش أكبر.</li>
+  </ul>
+</div>
+<p>الجزء التالي: <a href="ram-storage-gpu.html">RAM والتخزين وكرت الشاشة</a></p>
+</main>
+<script>
+const r=document.getElementById('cores'),c=document.getElementById('cooks'),b=document.getElementById('bar'),o=document.getElementById('out');
+function u(){const n=+r.value,t=Math.ceil(8/n)*4;c.textContent='👨‍🍳'.repeat(n);b.style.width=(t/32*100)+'%';o.textContent=n+(n===1?' طاهٍ':' طهاة')+' ← الوقت الكلي: '+t+' دقيقة'}
+r.oninput=u;u();
+</script>
 </body>
 </html>
