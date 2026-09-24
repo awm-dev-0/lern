@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شرح للمبتدئين | RAM / Storage / GPU</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Tahoma, sans-serif;
+            background: #f5f7fb;
+            color: #1e293b;
+            line-height: 1.9;
+        }
+
+        header {
+            background: #1e40af;
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        header h1 {
+            margin: 0 0 10px;
+            font-size: 38px;
+        }
+
+        header p {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            padding: 30px 20px;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+        }
+
+        h2 {
+            color: #1d4ed8;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: #334155;
+        }
+
+        .info {
+            background: #eff6ff;
+            border-right: 5px solid #2563eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .example {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .card {
+            padding: 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .card h3 {
+            color: #2563eb;
+        }
+
+        ul {
+            padding-right: 25px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+        }
+
+        @media (max-width: 700px) {
+            header h1 {
+                font-size: 28px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>شرح للمبتدئين</h1>
+    <p>RAM / Storage / GPU بطريقة بسيطة</p>
+</header>
+
+<div class="container">
+
+    <!-- RAM -->
+    <section class="section">
+        <h2>🧠 ما هي RAM؟</h2>
+
+        <p>
+            RAM اختصار لـ
+            <strong>Random Access Memory</strong>
+            أي ذاكرة الوصول العشوائي.
+        </p>
+
+        <p>
+            هي الذاكرة التي يستخدمها الكمبيوتر مؤقتًا أثناء تشغيل
+            البرامج والمهام.
+        </p>
+
+        <div class="info">
+            <strong>ببساطة:</strong>
+            تخيل أن RAM عبارة عن مكتب العمل.
+            كلما كان المكتب أكبر، تستطيع وضع عدد أكبر من الأشياء
+            والبرامج أمامك في نفس الوقت.
+        </div>
+
+        <h3>مثال</h3>
+
+        <div class="example">
+            <strong>8GB RAM</strong>
+            <p>
+                يمكنها التعامل مع عدد معين من البرامج والمهام في نفس الوقت.
+            </p>
+
+            <strong>16GB RAM</strong>
+            <p>
+                توفر مساحة أكبر للمهام والبرامج التي تعمل في نفس الوقت.
+            </p>
+        </div>
+
+        <div class="info">
+            <strong>مهم:</strong>
+            RAM ذاكرة مؤقتة، وعادةً يتم فقدان محتوياتها عند إيقاف تشغيل
+            الكمبيوتر.
+        </div>
+    </section>
+
+
+    <!-- Storage -->
+    <section class="section">
+        <h2>💾 ما هو Storage؟</h2>
+
+        <p>
+            Storage أو التخزين هو المكان الذي يتم فيه حفظ الملفات
+            والبرامج ونظام التشغيل بشكل دائم.
+        </p>
+
+        <p>
+            من أمثلة أجهزة التخزين:
+        </p>
+
+        <ul>
+            <li>HDD</li>
+            <li>SSD</li>
+            <li>NVMe SSD</li>
+        </ul>
+
+        <div class="info">
+            <strong>ببساطة:</strong>
+            إذا كانت RAM مثل مكتب العمل،
+            فإن Storage مثل خزانة تحفظ فيها ملفاتك وأشياءك
+            حتى بعد إغلاق الكمبيوتر.
+        </div>
+
+        <h3>ما الفرق بين HDD و SSD؟</h3>
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>HDD</h3>
+                <p>
+                    يعتمد على أجزاء ميكانيكية،
+                    وعادةً يكون أبطأ من SSD.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>SSD</h3>
+                <p>
+                    أسرع من HDD ولا يحتوي على أجزاء ميكانيكية
+                    متحركة.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>NVMe</h3>
+                <p>
+                    نوع من SSD يستخدم واجهة عالية السرعة
+                    مثل PCIe.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="example">
+            <strong>مثال:</strong>
+            إذا كان لديك SSD بسعة 512GB، فهذا يعني أن لديك
+            مساحة تخزين لحفظ نظام التشغيل والبرامج والملفات.
+        </div>
+    </section>
+
+
+    <!-- GPU -->
+    <section class="section">
+        <h2>🎮 ما هو GPU؟</h2>
+
+        <p>
+            GPU اختصار لـ
+            <strong>Graphics Processing Unit</strong>
+            أي وحدة معالجة الرسوميات.
+        </p>
+
+        <p>
+            وظيفته الأساسية هي معالجة الرسومات والصور والفيديو
+            والعمليات التي يمكن تنفيذها بالتوازي بشكل كبير.
+        </p>
+
+        <div class="info">
+            <strong>ببساطة:</strong>
+            تخيل أن CPU موظف عام يستطيع تنفيذ أنواع كثيرة من المهام،
+            بينما GPU مصمم بشكل خاص للتعامل مع عدد ضخم من العمليات
+            الرسومية والمتوازية.
+        </div>
+
+        <h3>أين يستخدم GPU؟</h3>
+
+        <ul>
+            <li>🎮 تشغيل الألعاب.</li>
+            <li>🎨 التصميم والجرافيك.</li>
+            <li>🎬 تحرير الفيديو.</li>
+            <li>🧊 التصميم ثلاثي الأبعاد.</li>
+            <li>🤖 بعض تطبيقات الذكاء الاصطناعي والحوسبة المتوازية.</li>
+        </ul>
+    </section>
+
+
+    <!-- Integrated vs Dedicated -->
+    <section class="section">
+        <h2>🖥️ أنواع GPU</h2>
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>Integrated GPU</h3>
+                <p>
+                    معالج رسومي مدمج داخل المعالج أو ضمن نفس المنظومة،
+                    ويستخدم عادةً جزءًا من ذاكرة النظام.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>Dedicated GPU</h3>
+                <p>
+                    بطاقة رسومية منفصلة تحتوي عادةً على
+                    ذاكرة رسومية خاصة بها.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>VRAM</h3>
+                <p>
+                    ذاكرة تستخدمها بطاقة الرسوميات لتخزين
+                    البيانات الرسومية أثناء العمل.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- الفرق -->
+    <section class="section">
+        <h2>🔗 الفرق بين RAM و Storage و GPU</h2>
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>RAM</h3>
+                <p>
+                    مساحة عمل مؤقتة للبرامج والمهام.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>Storage</h3>
+                <p>
+                    مكان حفظ الملفات والبرامج بشكل دائم.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3>GPU</h3>
+                <p>
+                    مسؤول بشكل أساسي عن معالجة الرسومات
+                    والعمليات المتوازية.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- مثال عملي -->
+    <section class="section">
+        <h2>💡 مثال عملي</h2>
+
+        <p>
+            تخيل أنك فتحت لعبة على الكمبيوتر:
+        </p>
+
+        <ol>
+            <li>
+                <strong>Storage:</strong>
+                يتم منه تحميل اللعبة وملفاتها.
+            </li>
+
+            <li>
+                <strong>RAM:</strong>
+                يتم استخدامها أثناء تشغيل اللعبة
+                لحفظ البيانات التي تحتاجها اللعبة أثناء العمل.
+            </li>
+
+            <li>
+                <strong>GPU:</strong>
+                يعالج الرسومات والصور التي تظهر على الشاشة.
+            </li>
+
+            <li>
+                <strong>CPU:</strong>
+                ينفذ تعليمات اللعبة ويعالج العديد من العمليات الأخرى.
+            </li>
+        </ol>
+    </section>
+
+
+    <!-- الخلاصة -->
+    <section class="section">
+        <h2>📌 الخلاصة</h2>
+
+        <div class="info">
+            <strong>RAM:</strong>
+            ذاكرة مؤقتة تستخدم أثناء تشغيل البرامج.
+        </div>
+
+        <div class="info">
+            <strong>Storage:</strong>
+            مساحة تخزين دائمة للملفات والبرامج ونظام التشغيل.
+        </div>
+
+        <div class="info">
+            <strong>GPU:</strong>
+            مسؤول بشكل أساسي عن معالجة الرسومات والعمليات المتوازية.
+        </div>
+
+        <div class="info">
+            <strong>قاعدة سهلة للحفظ:</strong><br>
+            RAM = مساحة العمل<br>
+            Storage = مكان حفظ الملفات<br>
+            GPU = معالجة الرسومات
+        </div>
+    </section>
+
+</div>
+
+<footer>
+    شرح Hardware للمبتدئين
+</footer>
+
+</body>
+</html>
