@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>العمليات مقابل الخيوط — ببساطة</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F4EFE4;color:#1D1A13;font-family:'Segoe UI',Tahoma,sans-serif;line-height:1.9;font-size:16px}
+.wrap{max-width:860px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:clamp(26px,4vw,38px);border-bottom:4px solid #C0431C;display:inline-block;padding-bottom:4px}
+h2{margin-top:34px;font-size:21px}
+.slogan{margin:14px 0 8px;font-size:18px}
+.slogan b{color:#C0431C}
+.box{background:#EAE3D2;border-right:4px solid #C0431C;padding:14px 18px;border-radius:3px;margin:22px 0}
+.building{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0}
+.apt{flex:1;min-width:170px;border:2px solid #2E5E4E;border-radius:4px;overflow:hidden;transition:.4s;background:#FBF7EE}
+.apt h3{background:#2E5E4E;color:#F7F3EA;font-size:13px;padding:7px 12px}
+.people{display:flex;gap:6px;padding:10px}
+.person,.thr{flex:1;text-align:center;font-size:11.5px;border:1px dashed #2E5E4E;border-radius:3px;padding:6px 4px;color:#2E5E4E}
+.thr{border-color:#31506F;color:#31506F;padding:8px 4px}
+.apt small{display:block;padding:0 12px 10px;color:#6B6250;font-size:11px}
+.apt.dead,.big.dead{opacity:.35;filter:grayscale(1)}
+.apt.dead h3,.big.dead h3{background:#777}
+.demo{border:1.5px solid #1D1A13;background:#FBF7EE;border-radius:4px;box-shadow:5px 5px 0 rgba(29,26,19,.12);padding:18px;margin:26px 0}
+.demo .q{font-size:13.5px;color:#6B6250;margin:4px 0 14px}
+.btn{border:1px solid #1D1A13;background:transparent;color:#1D1A13;padding:8px 16px;font-size:13.5px;font-weight:600;border-radius:3px;cursor:pointer;transition:.15s;margin-inline-end:8px}
+.btn:hover{background:#1D1A13;color:#F4EFE4}
+.msg{margin-top:14px;padding:10px 14px;border-radius:3px;font-size:14px;background:#EAE3D2}
+.msg.bad{background:#F3D3C4;color:#7C2A0E}
+.msg.good{background:#E7EDE4;color:#2E5E4E}
+.big{border:2px solid #31506F;border-radius:4px;overflow:hidden;transition:.4s;background:#FBF7EE}
+.big h3{background:#31506F;color:#F7F3EA;font-size:13px;padding:7px 12px}
+.threads{display:flex;gap:8px;padding:12px}
+table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px}
+th{border-bottom:2px solid #1D1A13;padding:9px 10px;text-align:right}
+td{border-bottom:1px solid rgba(29,26,19,.15);padding:8px 10px;color:#3E382B}
+td:first-child{font-weight:700;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>العمليات مقابل الخيوط</h1>
+  <p class="slogan">العملية = <b>شقة</b> مستقلة · الخيط = <b>فرد يعيش</b> داخل الشقة</p>
+
+  <div class="box">
+    <b>الفكرة في ثلاث جمل:</b><br>
+    1) تفتح أي برنامج ← نظام التشغيل يبني له <b>شقة (عملية)</b> بذاكرة خاصة لا يدخلها أحد غيره.<br>
+    2) داخل الشقة يعمل عدة <b>أفراد (خيوط)</b> معاً، وكلهم يتشاركون <b>نفس المطبخ (نفس الذاكرة)</b>.<br>
+    3) فرد يكسر الثلاجة ← البيت كله يتأثر. لكن شقة تحترق ← الجيران لا يشعرون بشيء.
+  </div>
+
+  <h2>العمارة — الصورة الكاملة</h2>
+  <div class="building">
+    <div class="apt"><h3>شقة 1 — كروم</h3><div class="people"><div class="person">خيط التحميل</div><div class="person">خيط العرض</div></div><small>ذاكرة خاصة</small></div>
+    <div class="apt"><h3>شقة 2 — مشغل الموسيقى</h3><div class="people"><div class="person">خيط الصوت</div><div class="person">خيط القائمة</div></div><small>ذاكرة خاصة</small></div>
+    <div class="apt"><h3>شقة 3 — اللعبة</h3><div class="people"><div class="person">خيط الرسوم</div><div class="person">خيط الشبكة</div></div><small>ذاكرة خاصة</small></div>
+  </div>
+
+  <div class="demo">
+    <h2 style="margin:0 0 4px;font-size:19px">تجربة 1 — كل تبويب كروم = شقة مستقلة (عملية)</h2>
+    <p class="q">اضغط الزر وشاهد ماذا يحدث للتبويبات الأخرى:</p>
+    <div class="building">
+      <div class="apt" id="t1"><h3>تبويب يوتيوب</h3><div class="people"><div class="person">عملية</div></div></div>
+      <div class="apt" id="t2"><h3>تبويب واتساب</h3><div class="people"><div class="person">عملية</div></div></div>
+      <div class="apt" id="t3"><h3>تبويب الأخبار</h3><div class="people"><div class="person">عملية</div></div></div>
+    </div>
+    <button class="btn" id="b1">انهّر تبويب يوتيوب</button>
+    <button class="btn" id="r1" style="display:none">أعد التشغيل</button>
+    <div class="msg" id="m1">جرّب الآن…</div>
+  </div>
+
+  <div class="demo">
+    <h2 style="margin:0 0 4px;font-size:19px">تجربة 2 — خيوط داخل برنامج واحد يتشاركون نفس الذاكرة</h2>
+    <p class="q">مشغل موسيقى فيه 3 خيوط. ماذا لو مات خيط واحد؟</p>
+    <div class="big" id="app">
+      <h3>مشغل الموسيقى — عملية واحدة</h3>
+      <div class="threads"><div class="thr">خيط الصوت</div><div class="thr">خيط كلمات الأغنية</div><div class="thr">خيط الواجهة</div></div>
+    </div>
+    <button class="btn" id="b2">انهار خيط الصوت (خطأ برمجي)</button>
+    <button class="btn" id="r2" style="display:none">أعد التشغيل</button>
+    <div class="msg" id="m2">جرّب الآن…</div>
+  </div>
+
+  <h2>الفرق في جدول واحد</h2>
+  <table>
+    <tr><th></th><th>العملية — شقة</th><th>الخيط — فرد داخل الشقة</th></tr>
+    <tr><td>الذاكرة</td><td>خاصة بها وحدها</td><td>مشتركة مع بقية خيوط نفس العملية</td></tr>
+    <tr><td>لو انهارت</td><td>البرامج الأخرى سليمة تماماً</td><td>البرنامج كله يسقط معها</td></tr>
+    <tr><td>التواصل</td><td>بطيء — يمر عبر النواة (IPC)</td><td>فوري — متغير مشترك يكفي</td></tr>
+    <tr><td>الكلفة</td><td>ثقيلة — ذاكرة كاملة جديدة</td><td>خفيفة جداً</td></tr>
+    <tr><td>متى نستخدمه؟</td><td>للعزل والأمان</td><td>للسرعة والتعاون</td></tr>
+  </table>
+
+  <div class="box" style="border-right-color:#2E5E4E">
+    <b>الخلاصة في سطر:</b> العمليات تعطيك <b>الأمان</b> (عزل)، والخيوط تعطيك <b>السرعة</b> (مشاركة) — ولهذا يضع كروم كل تبويب في شقة مستقلة، وداخل كل تبويب يعمل الأفراد بسلاسة معاً.
+  </div>
+</div>
+
+<script>
+const b1=document.getElementById('b1'),r1=document.getElementById('r1'),m1=document.getElementById('m1'),t1=document.getElementById('t1');
+b1.onclick=()=>{
+  t1.classList.add('dead');
+  m1.className='msg good';
+  m1.textContent='✓ يوتيوب انهار… لكن واتساب والأخبار يعملان كأن شيئاً لم يحدث — لأن كل تبويب شقة مستقلة بذاكرة خاصة.';
+  b1.style.display='none';r1.style.display='';
+};
+r1.onclick=()=>{t1.classList.remove('dead');m1.className='msg';m1.textContent='جرّب الآن…';b1.style.display='';r1.style.display='none';};
+
+const b2=document.getElementById('b2'),r2=document.getElementById('r2'),m2=document.getElementById('m2'),app=document.getElementById('app');
+b2.onclick=()=>{
+  app.classList.add('dead');
+  m2.className='msg bad';
+  m2.textContent='✗ خيط واحد مات ← البرنامج كله انهار! لأن الخيوط يتشاركون نفس الذاكرة: خطأ واحد يفسد على الجميع.';
+  b2.style.display='none';r2.style.display='';
+};
+r2.onclick=()=>{app.classList.remove('dead');m2.className='msg';m2.textContent='جرّب الآن…';b2.style.display='';r2.style.display='none';};
+</script>
+</body>
+</html>

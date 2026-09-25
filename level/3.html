@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>داخل الحاسوب — دليل تفاعلي</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--paper:#F4EFE4;--panel:#FBF7EE;--ink:#1D1A13;--dim:#6B6250;
+--line:rgba(29,26,19,.28);--soft:rgba(29,26,19,.12);--acc:#C0431C;
+--green:#2E5E4E;--blue:#31506F;--tb:#161811;--tg:#A8E89B;--td:#7E996F}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:'Segoe UI',Tahoma,Arial,sans-serif;line-height:1.9;font-size:15.5px}
+.wrap{max-width:920px;margin:0 auto;padding:0 22px}
+.mono{font-family:Consolas,Monaco,monospace}
+.kick{font-family:monospace;font-size:12px;color:var(--acc);letter-spacing:.05em;margin-bottom:14px}
+h1{font-size:clamp(28px,4.5vw,44px);line-height:1.5}
+h1 em{font-style:normal;border-bottom:4px solid var(--acc)}
+.lead{color:#3E382B;max-width:70ch;margin-top:12px}
+.idx{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.idx a{border:1px solid var(--line);padding:6px 14px;border-radius:2px;text-decoration:none;color:var(--ink);font-size:13px;transition:.15s}
+.idx a:hover{background:var(--ink);color:var(--paper)}
+header{padding-top:64px;padding-bottom:46px}
+.chap{border-top:1px solid var(--line);padding:56px 0 40px;scroll-margin-top:12px}
+.chap>h2{font-size:clamp(22px,3vw,30px);display:flex;gap:14px;align-items:baseline;margin-bottom:14px}
+.chap>h2 span{font-family:monospace;font-size:20px;color:var(--acc)}
+ul.pts{margin:14px 0 0;list-style:none}
+ul.pts li{position:relative;padding-inline-start:20px;margin-bottom:8px;color:var(--dim)}
+ul.pts li::before{content:'';position:absolute;inset-inline-start:2px;top:.95em;width:7px;height:7px;background:var(--acc)}
+ul.pts b{color:var(--ink)}
+.box{border-inline-start:4px solid var(--acc);background:#EAE3D2;padding:14px 18px;border-radius:0 3px 3px 0;margin:24px 0}
+.box b{color:var(--accent,#9E3513);color:#9E3513}
+.sim{border:1px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--soft);border-radius:3px;padding:18px;margin:24px 0}
+.sim>h3{font-size:14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--ink);background:transparent;color:var(--ink);padding:8px 15px;font-size:13px;font-weight:600;border-radius:2px;transition:.15s}
+.btn:hover:not(:disabled){background:var(--ink);color:var(--paper)}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.segs{display:inline-flex;border:1px solid var(--ink);border-radius:2px;overflow:hidden}
+.segs button{padding:7px 18px;background:transparent;border:none;font-size:13px;font-weight:600;color:var(--ink)}
+.segs button+button{border-inline-start:1px solid var(--ink)}
+.segs button.on{background:var(--ink);color:var(--paper)}
+.term{background:var(--tb);color:var(--tg);font-family:Consolas,monospace;font-size:12.5px;line-height:1.75;padding:14px;border-radius:3px;direction:ltr;text-align:left;overflow-y:auto}
+#bterm{height:280px}
+.lc{color:#E8E3D3}.ls{color:var(--td)}.lr{color:#7ED97E}.le{color:#E06A45}
+.grid2{display:grid;grid-template-columns:270px 1fr;gap:18px}
+@media(max-width:760px){.grid2,.mgrid,.fsgrid{grid-template-columns:1fr!important}}
+.bstep{border:1px solid var(--soft);padding:8px 12px;border-radius:2px;margin-bottom:8px;transition:.25s}
+.bstep b{font-size:13.5px}
+.bstep small{display:block;color:var(--dim);font-size:11.5px}
+.bstep.on{border-color:var(--acc);background:#fff;box-shadow:3px 3px 0 rgba(192,67,28,.18)}
+.bstep.done{opacity:.45}
+#bpower{width:100%;margin-top:4px;display:flex;justify-content:center;gap:8px}
+#bres{margin-top:10px;font-size:13px;background:#EAE3D2;padding:8px 12px;border-radius:2px}
+.pv{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:stretch}
+.pcard{flex:1;min-width:230px;max-width:330px;border:1.5px solid var(--pc);border-radius:3px;padding:12px;background:#fff}
+.pcard>b{display:block;color:var(--pc);font-size:13.5px;margin-bottom:8px}
+.pcard small{color:var(--dim);font-size:11px}
+.blk{display:block;border:1px solid var(--line);background:var(--paper);padding:8px 12px;border-radius:2px;font-size:12.5px;cursor:pointer;transition:.15s;margin-bottom:6px}
+.blk:hover{border-color:var(--acc)}
+.blk.lit{border-color:var(--acc);background:#F6E7DC;box-shadow:2px 2px 0 rgba(192,67,28,.2)}
+.blk.ipc{border-style:dashed;text-align:center;color:var(--acc);max-width:330px;flex-basis:100%}
+.thr3{display:flex;gap:8px}
+.thr3 .blk{flex:1;text-align:center;line-height:1.5}
+.mmnote{margin-top:12px;font-size:12.5px;color:var(--dim);border-inline-start:3px solid var(--line);padding-inline-start:12px;min-height:2.4em}
+.ku{border:1px solid var(--ink);border-radius:3px;overflow:hidden}
+.ku-sec{padding:12px 14px}
+.ku-tag{display:block;font-size:11px;color:var(--dim);font-family:monospace;margin-bottom:8px}
+.ku-user{background:#fff}
+.ku-kern{background:#EFE9DA;border-top:none}
+.kapp{border:1px solid var(--ink);background:transparent;padding:7px 16px;font-size:13px;font-weight:600;border-radius:2px;margin-inline-end:6px;margin-bottom:6px}
+.kapp.on{background:var(--ink);color:var(--paper)}
+.kapp.dead{opacity:.35;text-decoration:line-through;cursor:not-allowed}
+.kbnd{position:relative;text-align:center;border:1px dashed var(--acc);background:#F6E7DC;padding:3px 0}
+.kbnd span{font-family:monospace;font-size:10.5px;color:#9E3513;background:#F6E7DC;padding:0 12px;position:relative}
+.kbnd.alert{animation:shake .5s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.kmods{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kmods div{border:1px solid var(--line);background:#fff;border-radius:2px;padding:6px 10px;font-size:12px}
+.kcount{display:flex;gap:10px;margin-bottom:10px}
+.kcount div{flex:1;border:1px solid var(--line);border-radius:2px;padding:7px 12px;font-size:11px;color:var(--dim)}
+.kcount b{display:block;font-family:monospace;font-size:16px;color:var(--ink)}
+.kcount .bad b{color:var(--acc)}
+#klog{height:200px;font-size:11.5px}
+#kacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#kacts .btn{font-size:12px;padding:7px 12px}
+.fsgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+#fstree{border:1px solid var(--line);border-radius:3px;background:#fff;padding:10px;max-height:420px;overflow:auto}
+#fstree details{margin:3px 0}
+#fstree details details{margin-inline-start:18px}
+#fstree summary{display:flex;gap:8px;align-items:center;padding:5px 8px;cursor:pointer;list-style:none;border-radius:2px;font-size:13px}
+#fstree summary::-webkit-details-marker{display:none}
+#fstree summary::before{content:'▸';color:var(--dim)}
+#fstree details[open]>summary::before{content:'▾'}
+#fstree summary:hover{background:var(--paper)}
+.fname{font-family:monospace;direction:ltr;unicode-bidi:embed;font-size:12.5px}
+.ftag{margin-inline-start:auto;font-size:10px;border:1px solid var(--line);padding:0 7px;border-radius:2px;color:var(--dim)}
+.ftag.b{color:var(--acc);border-color:rgba(192,67,28,.45)}
+.ftag.v{color:var(--blue);border-color:rgba(49,80,111,.45)}
+.ffile{display:flex;gap:8px;align-items:center;padding:5px 8px;margin:3px 0;margin-inline-start:18px;cursor:pointer;border-radius:2px;font-size:13px}
+.ffile:hover{background:var(--paper)}
+.fspanel{border:1px solid var(--ink);background:var(--panel);border-radius:3px;padding:16px}
+.fbig{font-family:monospace;direction:ltr;text-align:left;font-size:21px;font-weight:600}
+.fpath{font-family:monospace;direction:ltr;text-align:left;font-size:12px;color:#9E3513;margin:2px 0 12px}
+.frow{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.frow span{color:var(--dim)}
+.fnote{margin-top:12px;font-size:12.5px;background:#EAE3D2;padding:9px 12px;border-radius:2px;border-inline-start:3px solid var(--blue)}
+.mgrid{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
+.mkern{background:var(--ink);color:var(--paper);font-size:10.5px;font-family:monospace;padding:8px 12px;display:flex;justify-content:space-between;border-radius:3px 3px 0 0}
+.muser{border:1px solid var(--ink);border-top:none;background:#F9F5EB;padding:0 12px;display:flex;flex-direction:column;border-radius:0 0 3px 3px}
+#mstack{overflow:hidden;transition:height .3s;display:flex;flex-direction:column}
+.mframe{height:28px;flex-shrink:0;background:#DEE5EA;border:1px solid var(--blue);display:flex;justify-content:space-between;align-items:center;padding:0 10px;font-size:11px;font-family:monospace;direction:ltr}
+.marr{font-size:10px;color:var(--dim);height:16px;display:flex;align-items:center;flex-shrink:0}
+#mgap{flex-shrink:0;border:1px dashed rgba(46,94,78,.55);background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(46,94,78,.12) 6px 7px);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:height .3s}
+#mgap span{font-size:10.5px;color:var(--green);background:var(--paper);padding:2px 10px;border:1px solid rgba(46,94,78,.55);border-radius:2px;text-align:center}
+#mgap.warn{border-color:#B98A2E;background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(185,138,46,.18) 6px 7px)}
+#mgap.warn span{color:#8A6414;border-color:#B98A2E}
+#mgap.crit{border-color:var(--acc);background:repeating-linear-gradient(45deg,transparent 0 6px,rgba(192,67,28,.22) 6px 7px)}
+#mgap.crit span{color:var(--acc);border-color:var(--acc);font-weight:700}
+#mheap{overflow:hidden;transition:height .3s;display:flex;flex-direction:column-reverse}
+.mblock{height:26px;flex-shrink:0;background:#DFE8DC;border:1px solid var(--green);display:flex;justify-content:space-between;align-items:center;padding:0 10px;font-size:11px;font-family:monospace;direction:ltr}
+.mtext{background:var(--paper);border-top:1px solid var(--line);font-family:monospace;font-size:10.5px;padding:7px 12px;direction:ltr;text-align:left;border-radius:0 0 3px 3px}
+.mregs{display:flex;gap:16px;font-family:monospace;font-size:11.5px;color:var(--dim);margin-bottom:12px;flex-wrap:wrap}
+.mregs b{color:var(--ink);font-weight:500}
+.mbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mbtns .btn{font-family:monospace;direction:ltr}
+#mlog{margin-top:12px;font-size:12.5px;color:var(--dim);min-height:3em;border-top:1px dashed var(--line);padding-top:10px}
+#moom{margin-top:10px;background:#F3D3C4;border:1px solid var(--acc);border-radius:2px;padding:9px 13px;font-size:12.5px;color:#7C2A0E}
+.vcount{display:flex;border:1px solid var(--line);border-radius:2px;overflow:hidden;flex-wrap:wrap;margin-bottom:16px}
+.vcount div{flex:1;min-width:150px;padding:9px 14px;border-inline-start:1px solid var(--line);font-size:11px;color:var(--dim)}
+.vcount div:first-child{border-inline-start:none}
+.vcount b{display:block;font-family:monospace;font-size:15px;color:var(--ink)}
+.vstack{display:flex;flex-direction:column;gap:10px}
+#vguests{display:flex;gap:10px;min-height:120px;flex-wrap:wrap}
+.vempty{border:1px dashed var(--line);border-radius:3px;width:100%;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12.5px;padding:20px}
+.vguest{flex:1;min-width:140px;max-width:200px;border:1.5px solid var(--gc);border-radius:3px;background:#fff;padding:10px 12px;position:relative;animation:pop .3s}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}}
+.vguest b{display:block;font-family:monospace;direction:ltr;text-align:left;font-size:13px;color:var(--gc)}
+.vguest span{display:block;font-size:11.5px;margin-top:4px}
+.vguest .vsub{color:var(--dim);font-size:10.5px}
+.vx{position:absolute;top:4px;left:6px;border:none;background:transparent;font-size:16px;color:var(--dim);line-height:1}
+.vx:hover{color:var(--acc)}
+.vlayer{border:1px solid var(--ink);background:#EAE3D2;text-align:center;padding:10px;font-size:12.5px;border-radius:2px}
+.vhw{background:var(--ink);color:var(--paper)}
+.vacts{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+table.cmp{width:100%;border-collapse:collapse;margin-top:24px;font-size:13px}
+.cmp th{font-size:14.5px;text-align:right;padding:9px 12px;border-bottom:2px solid var(--ink)}
+.cmp td{padding:8px 12px;border-bottom:1px solid var(--soft);color:var(--dim);vertical-align:top}
+.cmp td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+.cmdbox{border:1px solid var(--ink);border-radius:3px;overflow:hidden;margin-top:20px}
+.cmdbox h4{background:var(--ink);color:var(--paper);font-size:12.5px;font-weight:600;padding:8px 14px}
+.crow{border-top:1px dashed var(--line)}
+.crow code{display:block;direction:ltr;text-align:left;font-family:monospace;font-size:12.5px;background:var(--tb);color:#E8E3D3;padding:7px 14px}
+.crow span{display:block;padding:5px 14px;font-size:12px;color:var(--dim)}
+footer{border-top:1px solid var(--line);padding:34px 0 50px;margin-top:30px}
+footer p{font-size:13px;color:var(--dim)}
+</style>
+</head>
+<body>
+<noscript><p style="text-align:center;background:#F3D3C4;padding:10px">المحاكاات تحتاج JavaScript — فعّلها من إعدادات المتصفح، والنصوص تظهر في كل الأحوال.</p></noscript>
+
+<header class="wrap">
+  <p class="kick">دليل تفاعلي · أساسيات أنظمة التشغيل</p>
+  <h1>ماذا يحدث داخل حاسوبك <em>بينما تعمل</em>؟</h1>
+  <p class="lead">ستة مفاهيم أساسية، لكل منها شرح مبسط + تشبيه من الواقع + محاكاة تتفاعلها بيدك + أوامر حقيقية لتجربتها في طرفية لينكس.</p>
+  <nav class="idx">
+    <a href="#ch1">01 · الإقلاع</a><a href="#ch2">02 · العمليات والخيوط</a><a href="#ch3">03 · النواة والمستخدم</a><a href="#ch4">04 · نظام الملفات</a><a href="#ch5">05 · الذاكرة</a><a href="#ch6">06 · الافتراضية</a>
+  </nav>
+</header>
+
+<main class="wrap">
+
+<!-- ================= 01 ================= -->
+<section class="chap" id="ch1">
+  <h2><span>01</span> عملية الإقلاع — Boot Process</h2>
+  <p class="lead">تضغط زر الطاقة فتعدّ ثوانٍ حتى تظهر شاشتك. ما يجري هو سلسلة تسليم بين أربعة برامج: كل واحد لا يعرف إلا من بيده مفتاح الخطوة التالية. عند التشغيل الذاكرة فارغة تماماً — فالمعالج مصمم ليقفز دائماً إلى عنوان ثابت في شريحة BIOS/UEFI ويبدأ من هناك.</p>
+  <div class="box"><b>تشبيه — افتتاح مطعم:</b> تُفحص الكهرباء والمطبخ (<b>POST</b>)، ثم يُفتح الباب الخلفي للمدير (<b>Bootloader</b>)، المدير يشغّل المولدات (<b>النواة</b>)، المشرف يستدعي الطهاة واحداً تلو الآخر (<b>systemd والخدمات</b>)، وأخيراً تُفتح أبواب الزبناء (<b>شاشة الدخول</b>). لا أحد يستطيع تخطي من قبله.</div>
+  <div class="sim">
+    <h3>محاكاة: إقلاع لينكس من الصفر <span style="font-size:12px;color:var(--dim)">اضغط الزر وراقب</span></h3>
+    <div class="grid2">
+      <div id="bsteps">
+        <div class="bstep"><b>1 · UEFI / BIOS</b><small>يفحص العتاد (POST) ويحدد قرص الإقلاع</small></div>
+        <div class="bstep"><b>2 · Bootloader — GRUB</b><small>يحمل نواة النظام إلى الذاكرة</small></div>
+        <div class="bstep"><b>3 · النواة Kernel</b><small>تهيئ التعريفات وتصل نظام الملفات وتشغل أول عملية</small></div>
+        <div class="bstep"><b>4 · systemd</b><small>العملية رقم 1: تشغّل الشبكة والصوت والخدمات</small></div>
+        <div class="bstep"><b>5 · شاشة الدخول</b><small>النظام جاهز — الدور عليك الآن</small></div>
+      </div>
+      <div>
+        <div class="term" id="bterm"><div style="color:var(--td)">— الشاشة مطفأة. اضغط زر الطاقة —</div></div>
+        <button class="btn" id="bpower">⏻ شغّل الجهاز</button>
+        <div id="bres" hidden></div>
+      </div>
+    </div>
+  </div>
+  <div class="cmdbox"><h4>جرّبها في طرفية حقيقية</h4>
+    <div class="crow"><code>dmesg | less</code><span>رسائل النواة منذ الإقلاع — نفس ما رأيته في المحاكاة.</span></div>
+    <div class="crow"><code>systemd-analyze blame</code><span>كم ثانية استهلكت كل خدمة عند الإقلاع؟</span></div>
+  </div>
+</section>
+
+<h1>02 </h1> 
+<a  href="./index2.html">العمليات مقابل الخيوط — Processes vs Threads</a>
+ 
+
+<!-- ================= 03 ================= -->
+<section class="chap" id="ch3">
+  <h2><span>03</span> النواة وفضاء المستخدم — Kernel vs User Space</h2>
+  <p class="lead">تطبيقك لا يلمس العتاد أبداً — لا القرص ولا الشبكة ولا حتى ذاكرته. بينه وبينها <b>جدار امتياز</b>: فوقه التطبيقات (فضاء المستخدم)، وتحته <b>النواة</b> التي وحدها تملك مفاتيح العتاد. المعبر الوحيد هو <b>استدعاء نظامي (syscall)</b> — والعتاد نفسه يرفض أي محاولة تسلل.</p>
+  <div class="sim">
+    <h3>محاكاة: اعبر الحدود… أو اصطدم بها <span style="font-size:12px;color:var(--dim)">اختر تطبيقاً ثم اطلب عمليات</span></h3>
+    <div class="grid2">
+      <div class="ku">
+        <div class="ku-sec ku-user">
+          <span class="ku-tag">فضاء المستخدم — ring 3 · صلاحيات محدودة</span>
+          <button class="kapp on" data-n="المتصفح">المتصفح</button>
+          <button class="kapp" data-n="محرر النصوص">محرر نصوص</button>
+          <button class="kapp" data-n="اللعبة">لعبة</button>
+        </div>
+        <div class="kbnd" id="kbnd"><span>حد الامتياز — trap / syscall</span></div>
+        <div class="ku-sec ku-kern">
+          <span class="ku-tag">فضاء النواة — ring 0 · صلاحيات كاملة</span>
+          <div class="kmods">
+            <div><b>VFS</b> — نظام الملفات</div><div><b>TCP/IP</b> — الشبكة</div>
+            <div><b>MMU</b> — إدارة الذاكرة</div><div><b>Drivers</b> — التعريفات</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="kcount">
+          <div><b id="kok">0</b>استدعاء ناجح</div>
+          <div class="bad"><b id="kcr">0</b>تطبيق انهار</div>
+        </div>
+        <div class="term" id="klog"></div>
+        <div id="kacts">
+          <button class="btn" data-r="read">اقرأ ملفاً</button>
+          <button class="btn" data-r="net">أرسل حزمة</button>
+          <button class="btn" data-r="aud">شغّل الصوت</button>
+          <button class="btn" data-r="hack">اكتب في ذاكرة النواة!</button>
+          <button class="btn" id="krestart" hidden>أعد تشغيل المنهارة</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="box"><b>تشبيه — خزنة البنك:</b> أنت (التطبيق) لا تدخل غرفة الخزنة أبداً — تملأ نموذجاً (syscall) وتقدمه للموظف (النواة) الذي وحده يملك المفتاح. طلب مشروع يُنفذ ويعود إليك بالنتيجة، وطلب مشبوه يجعلك مطروداً من البنك (SIGSEGV).</div>
+  <div class="cmdbox"><h4>جرّبها في طرفية حقيقية</h4>
+    <div class="crow"><code>strace ls</code><span>تفرّج حياً على كل استدعاء نظامي ينفذه أمر بسيط.</span></div>
+    <div class="crow"><code>strace -c ls</code><span>ملخص: كم syscall من كل نوع؟ وكم من الوقت؟</span></div>
+  </div>
+</section>
+
+<!-- ================= 04 ================= -->
+<section class="chap" id="ch4">
+  <h2><span>04</span> نظام الملفات — Filesystem</h2>
+  <p class="lead">على لينكس شجرة واحدة تبدأ من الجذر <span class="mono">/</span> وكل شيء عليها <b>ملف</b>: نصوصك، أجهزتك، بل بيانات النواة الحية. والمجلد ليس صندوقاً بل قائمة أسماء تشير إلى أرقام <b>inode</b> — البطاقة الحقيقية للملف على القرص. الاسم مجرد ملصق؛ الملف نفسه يعيش عند رقم الـ inode.</p>
+  <div class="sim">
+    <h3>مستكشف شجرة حقيقية <span style="font-size:12px;color:var(--dim)">وسّع المجلدات وانقر أي عنصر</span></h3>
+    <div class="fsgrid">
+      <div id="fstree"></div>
+      <div class="fspanel" id="fspanel"><p style="color:var(--dim);font-size:13px">انقر أي عنصر في الشجرة…</p></div>
+    </div>
+  </div>
+  <div class="box"><b>تشبيه — مكتبة كبيرة:</b> المجلدات = <b>فهارس الأجنحة</b> (قوائم عناوين فقط)، أما <b>الـ inode فهو بطاقة الكتاب في السجل المركزي</b>: رقم الرف وعدد الصفحات. يمكنك تغيير عنوان الكتاب أو كتابته في فهارس متعددة — والكتاب لم يتحرك من رفّه.</div>
+  <div class="cmdbox"><h4>جرّبها في طرفية حقيقية</h4>
+    <div class="crow"><code>ls -i report.md</code><span>اعرض رقم inode — هل يتطابق مع ملف آخر؟ إذن هما نسخة واحدة.</span></div>
+    <div class="crow"><code>stat /etc/passwd</code><span>البطاقة الكاملة: inode والأذونات وأوقات التعديل.</span></div>
+  </div>
+</section>
+
+<!-- ================= 05 ================= -->
+<section class="chap" id="ch5">
+  <h2><span>05</span> أساسيات الذاكرة — Memory Basics</h2>
+  <p class="lead">لكل عملية وهمٌ جميل: إنها وحدها تملك الذاكرة كلها. الحقيقة أن النواة تترجم عناوينها الافتراضية إلى ذاكرة فعلية عبر MMU. المخطط الذي تراه كل عملية:</p>
+  <ul class="pts">
+    <li><b>المكدس (Stack):</b> إطارات الدوال — ينمو <b>نزولاً</b> ويُنظف تلقائياً عند عودة كل دالة.</li>
+    <li><b>الكومة (Heap):</b> حجوزات malloc / new — تنمو <b>صعوداً</b> ولا تُحرر إلا بيدك؛ من نسي free() سرّب الذاكرة.</li>
+    <li><b>وإن امتلأت RAM؟</b> النواة تنقل صفحات قديمة إلى القرص (swap) وتسترجعها عند الحاجة.</li>
+  </ul>
+  <div class="sim">
+    <h3>محاكاة: املأ الذاكرة من الجهتين حتى يلتقي المتقاهما</h3>
+    <div class="mgrid">
+      <div>
+        <div class="mkern"><span>فضاء النواة — محجوز</span><span>0xFFFF8000…</span></div>
+        <div class="muser">
+          <div id="mstack"></div>
+          <div class="marr">↓ المكدس ينمو نزولاً</div>
+          <div id="mgap"><span id="mglbl"></span></div>
+          <div class="marr">↑ الكومة تنمو صعوداً</div>
+          <div id="mheap"></div>
+        </div>
+        <div class="mtext">.text + .data — كود البرنامج (0x00400000)</div>
+      </div>
+      <div>
+        <div class="mregs"><span>rsp (قمة المكدس) <b id="mrsp"></b></span><span>brk (حد الكومة) <b id="mbrk"></b></span></div>
+        <div class="mbtns">
+          <button class="btn" id="bcall">func()</button>
+          <button class="btn" id="bret">return</button>
+          <button class="btn" id="bmal">malloc(64KB)</button>
+          <button class="btn" id="bfre">free()</button>
+        </div>
+        <p id="mlog"></p>
+        <div id="moom" hidden><b>نفدت الذاكرة!</b> التقت الكومة والمكدس ولا مساحة كافية للحجز — النواة رفضت الطلب.</div>
+        <button class="btn" id="mreset" style="margin-top:10px">إعادة تعيين</button>
+        <p style="margin-top:12px;font-size:12px;color:var(--dim)">جرّب: اضغط malloc عدة مرات بلا free() — هكذا بالضبط يتسرب الذاكرة في برنامج حقيقي.</p>
+      </div>
+    </div>
+  </div>
+  <div class="box"><b>تشبيه — مكتبي:</b> <b>المكدس = أدراج المكتبي</b>: أوراق كل مهمة تُدفع مع بدايتها وتُخرج تلقائياً بانتهائها. <b>الكومة = مستودع خارجي</b>: تطلب صناديق عند الحاجة ويجب إعادتها بنفسك — وإلا تراكمت حتى امتلأ المكان.</div>
+  <div class="cmdbox"><h4>جرّبها في طرفية حقيقية</h4>
+    <div class="crow"><code>free -h</code><span>الذاكرة الحية الآن: المستخدمة والـ swap.</span></div>
+    <div class="crow"><code>pmap &lt;pid&gt;</code><span>خريطة الذاكرة الكاملة لأي عملية.</span></div>
+  </div>
+</section>
+
+<!-- ================= 06 ================= -->
+<section class="chap" id="ch6">
+  <h2><span>06</span> الافتراضية — Virtualization</h2>
+  <p class="lead">حاسوب واحد، عدة حواسيب: طبقة اسمها <b>Hypervisor</b> تقسم العتاد على أنظمة تشغيل كاملة (أجهزة افتراضية VM)، أو نعزل العمليات فقط فوق نواة المضيف الواحدة (<b>حاويات</b>).</p>
+  <ul class="pts">
+    <li><b>VM:</b> نظام كامل بنواة خاصة — عزل مطلق لكنه ثقيل: جيجابايتات وعشرات الثواني للإقلاع.</li>
+    <li><b>حاوية:</b> عمليات معزولة بـ namespaces و cgroups — تقلع في أجزاء من الثانية وتستهلك ميغابايتات.</li>
+  </ul>
+  <div class="sim">
+    <h3>ابنِ عمارتك الافتراضية
+      <span class="segs" id="vseg"><button class="on" data-m="vm">أجهزة افتراضية VM</button><button data-m="ct">حاويات Containers</button></span>
+    </h3>
+    <div class="vcount">
+      <div><b id="vram">0 MB</b>ذاكرة إضافية</div>
+      <div><b id="vboot">—</b>زمن الإقلاع</div>
+      <div><b id="vcores">—</b>النواة</div>
+    </div>
+    <div class="vstack">
+      <div id="vguests"></div>
+      <div class="vlayer" id="vmid"></div>
+      <div class="vlayer" id="vhost" hidden>نظام المضيف — <b>نواة لينكس واحدة</b> تخدم كل الحاويات</div>
+      <div class="vlayer vhw">العتاد الفعلي — CPU · RAM · Disk</div>
+    </div>
+    <div class="vacts">
+      <button class="btn" id="vadd">+ أضف عنصراً</button>
+      <button class="btn" id="vclr">أفرغ الكل</button>
+    </div>
+  </div>
+  <table class="cmp">
+    <tr><th></th><th>جهاز افتراضي VM</th><th>حاوية Container</th></tr>
+    <tr><td>ماذا يحمل؟</td><td>نظام تشغيل كامل بنوته</td><td>عمليات معزولة فقط</td></tr>
+    <tr><td>الإقلاع</td><td>عشرات الثواني</td><td>أجزاء من الثانية</td></tr>
+    <tr><td>العزل</td><td>مطلق — النواة منفصلة</td><td>جيد — النواة مشتركة</td></tr>
+    <tr><td>الكلفة</td><td>جيجابايتات</td><td>ميجابايتات</td></tr>
+    <tr><td>أمثلة</td><td class="mono" style="direction:ltr">VirtualBox · KVM · Hyper-V</td><td class="mono" style="direction:ltr">Docker · Podman · LXC</td></tr>
+  </table>
+  <div class="box"><b>تشبيه — عمارات وشقق:</b> الـ VM = <b>بناء عمارة كاملة</b>: أساس وعدادات خاصة — معزولة تماماً لكن مكلفة وبطيئة. الحاوية = <b>شقة في بناية واحدة</b>: الجدران تفصل السكان، لكن الجميع على نفس الأساس (نواة المضيف) — سريعة ورخيصة، وإن اهتز الأساس اهتز الجميع.</div>
+  <div class="cmdbox"><h4>جرّبها بنفسك</h4>
+    <div class="crow"><code>docker run -d nginx</code><span>حاوية تقلع خلال أجزاء من الثانية.</span></div>
+    <div class="crow"><code>lsmod | grep kvm</code><span>وحدة الافتراضية في نواة لينكس — بمساعدة المعالج نفسه.</span></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <p><b>للتعمق:</b> كتاب Operating Systems: Three Easy Pieces (مجاني على الإنترنت) · رسوم Julia Evans · توثيق kernel.org</p>
+</footer>
+
+<script>
+const $=(s,c=document)=>c.querySelector(s),$$=(s,c=document)=>[...c.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ---------- 01 الإقلاع ---------- */
+(()=>{
+const term=$('#bterm'),btn=$('#bpower'),steps=$$('#bsteps .bstep'),res=$('#bres');
+const L=[
+['Supermicro UEFI BIOS v3.41',300,0],['POST: CPU 12c/24t .......... OK',400,0],
+['POST: Memory 32768 MB ..... OK',450,0],['POST: NVMe0 SAMSUNG 1TB ... OK',350,0],
+['Booting from NVMe0 ...',450,0],['GRUB 2.12',400,1],
+['Loading /boot/vmlinuz-6.8.0',420,1],['Loading /boot/initrd.img',420,1],
+['[    0.000000] Linux version 6.8.0',420,2],
+['[    0.401552] PCI: Probing hardware',330,2],
+['[    0.887120] EXT4-fs: mounted filesystem',380,2],
+['[    1.203411] Loading kernel modules ... done',380,2],
+['systemd[1]: Starting Network Manager ...',340,3],
+['systemd[1]: Started D-Bus System Bus.',300,3],
+['systemd[1]: Reached target Multi-User System.',340,3],
+['systemd[1]: Starting GDM Display Manager ...',380,3],
+['systemd[1]: Reached target Graphical Interface.',320,4],
+['localhost login:',450,4]];
+let busy=false;
+btn.onclick=async()=>{
+  if(busy)return;busy=true;btn.disabled=true;btn.textContent='يقلع…';
+  term.innerHTML='';res.hidden=true;
+  steps.forEach(s=>s.classList.remove('on','done'));
+  let last=-1;
+  for(const [t,d,s] of L){
+    if(s!==last){steps.forEach((el,i)=>{el.classList.toggle('on',i===s);el.classList.toggle('done',i<s)});last=s;}
+    const div=document.createElement('div');div.textContent=t;
+    term.appendChild(div);term.scrollTop=term.scrollHeight;
+    await sleep(d);
+  }
+  steps.forEach(el=>{el.classList.remove('on');el.classList.add('done')});
+  res.hidden=false;res.innerHTML='أقلع النظام — كل مرحلة سلّم المفتاح لمن بعدها، والآن <b>أنت</b> تدخل.';
+  btn.disabled=false;btn.textContent='⏻ أعد التشغيل';busy=false;
+};
+})();
+
+/* ---------- 02 العمليات والخيوط ---------- */
+(()=>{
+const bp=$('#vp'),vt=$('#vt'),note=$('#mnote');
+ $$('#segpt button').forEach(b=>b.onclick=()=>{
+  $$('#segpt button').forEach(x=>x.classList.toggle('on',x===b));
+  bp.hidden=b.dataset.m!=='p';vt.hidden=b.dataset.m!=='t';
+});
+const N={own:'ذاكرة خاصة بالعملية — عملية أخرى لا تراها مهما حاولت (عزل كامل).',
+ipc:'الاتصال بين العمليات: أنابيب ومقابس وذاكرة مشتركة — يمر عبر النواة: آمن لكنه أبطأ.',
+shr:'منطقة مشتركة: كل الخيوط يرونها فوراً — التواصل مجاني، لكن خطأ خيط يفسد على الجميع.',
+tst:'مكدس الخيط: الجزء الوحيد غير المشترك — لكل خيط سلسلة استدعاءاته الخاصة.'};
+ $$('.blk').forEach(el=>el.onclick=()=>{
+  $$('.blk').forEach(x=>x.classList.remove('lit'));
+  el.classList.add('lit');note.textContent=N[el.dataset.k]||'';
+});
+})();
+
+/* ---------- 03 النواة والمستخدم ---------- */
+(()=>{
+const log=$('#klog'),apps=$$('.kapp'),bnd=$('#kbnd'),acts=$$('#kacts button');
+const kok=$('#kok'),kcr=$('#kcr'),rbtn=$('#krestart');
+let cur=apps[0],busy=false,ok=0,cr=0;
+apps.forEach(a=>a.onclick=()=>{if(busy)return;apps.forEach(x=>x.classList.toggle('on',x===a));cur=a;});
+const put=(c,t)=>{const d=document.createElement('div');d.className=c;d.textContent=t;log.appendChild(d);log.scrollTop=log.scrollHeight;};
+const R={
+ read:{name:'read()',steps:['النواة: VFS يتحقق من المسار والأذونات','ext4 يجد رقم inode للملف','التعريف يقرأ القطاعات من القرص'],ret:'عادت 4096 بايت إلى التطبيق — الزمن ≈ 2 ميكروثانية'},
+ net:{name:'sendto()',steps:['مكدس TCP/IP يبني رأس الحزمة','النواة تنسخها إلى ذاكرة بطاقة الشبكة','البطاقة تبثها على السلك'],ret:'الحزمة في الطريق — التطبيق لم يتوقف منتظراً'},
+ aud:{name:'write()',steps:['نظام ALSA يستقبل عينات الصوت','المازج يدمجها مع بقية المصادر','التعريف يمررها إلى بطاقة الصوت'],ret:'تسمع النتيجة عبر السماعات الآن'}};
+put('ls','السجل جاهز — اختر تطبيقاً واطلب منه شيئاً.');
+acts.forEach(b=>b.onclick=async()=>{
+  if(busy)return;busy=true;acts.forEach(x=>x.disabled=true);
+  const name=cur.dataset.n;
+  if(b.dataset.r==='hack'){
+    put('lc','> '+name+' يحاول الكتابة في ذاكرة النواة مباشرة…');
+    await sleep(450);
+    bnd.classList.add('alert');setTimeout(()=>bnd.classList.remove('alert'),900);
+    put('le','استثناء من العتاد: General Protection Fault — ring 3 ممنوع');
+    await sleep(420);
+    put('le','النواة ترسل SIGSEGV ← تم إنهاء «'+name+'»');
+    kcr.textContent=++cr;
+    cur.classList.add('dead');cur.disabled=true;
+    const alive=apps.find(a=>!a.disabled);
+    if(alive){apps.forEach(x=>x.classList.toggle('on',x===alive));cur=alive;}
+    rbtn.hidden=false;
+  }else{
+    const r=R[b.dataset.r];
+    put('lc','> '+name+' ينفذ: '+r.name);
+    await sleep(430);
+    put('ls','عبور حد الامتياز (trap) — النواة تعمل الآن في ring 0 نيابة عنه');
+    for(const s of r.steps){await sleep(380);put('ls',s);}
+    await sleep(250);put('lr','← '+r.ret);
+    kok.textContent=++ok;
+  }
+  busy=false;acts.forEach(x=>x.disabled=false);
+});
+rbtn.onclick=()=>{apps.forEach(a=>{a.classList.remove('dead');a.disabled=false});cur=apps[0];apps.forEach(x=>x.classList.toggle('on',x===cur));rbtn.hidden=true;};
+})();
+
+/* ---------- 04 نظام الملفات ---------- */
+(()=>{
+const DATA={n:'/',k:'d',c:[
+ {n:'bin',k:'d',c:[{n:'bash',k:'f',i:1042,p:'-rwxr-xr-x',s:'1.2 MB',t:'الصدفة التي تنفذ أوامرك في الطرفية.'},{n:'ls',k:'f',i:1043,p:'-rwxr-xr-x',s:'142 KB'}]},
+ {n:'etc',k:'d',c:[{n:'passwd',k:'f',i:2101,p:'-rw-r--r--',s:'2.4 KB'},{n:'fstab',k:'f',i:2102,p:'-rw-r--r--',s:'612 B'}]},
+ {n:'dev',k:'d',c:[{n:'sda',k:'b',i:77,p:'brw-rw----',s:'0 B',t:'قرصك الفعلي معروض كملف! هنا «كل شيء ملف» حرفياً.'}]},
+ {n:'home',k:'d',open:1,c:[{n:'sara',k:'d',c:[
+   {n:'cat.jpg',k:'f',i:8841,p:'-rw-r--r--',s:'2.1 MB',t:'تذكر رقم inode: 8841 — ستجده مرة أخرى في usr/share!'},
+   {n:'report.md',k:'f',i:5120,p:'-rw-r--r--',s:'12 KB'}]}]},
+ {n:'proc',k:'d',c:[{n:'cpuinfo',k:'v',i:0,p:'-r--r--r--',s:'0 B',t:'ليس ملفاً حقيقياً: النواة تولّد محتواه لحظة قراءتك له — لا يشغل بايتاً على القرص.'},{n:'meminfo',k:'v',i:0,p:'-r--r--r--',s:'0 B'}]},
+ {n:'usr',k:'d',c:[{n:'share',k:'d',c:[{n:'wallpapers',k:'d',c:[{n:'cat.jpg',k:'f',i:8841,p:'-rw-r--r--',s:'2.1 MB',t:'نفس inode رقم 8841 ← نسخة واحدة على القرص بمسارين (hard link).'}]}]}]},
+ {n:'var',k:'d',c:[{n:'log',k:'d',c:[{n:'syslog',k:'f',i:9102,p:'-rw-r-----',s:'1.4 MB'}]}]}]};
+const tree=$('#fstree'),panel=$('#fspanel');
+const K={d:'مجلد',f:'ملف',b:'جهاز',v:'وهمي'};
+function show(n,path){
+  panel.innerHTML='<div class="fbig">'+n.n+'</div><div class="fpath">'+path+'</div>'
+  +'<div class="frow"><span>النوع</span><b>'+K[n.k]+'</b></div>'
+  +'<div class="frow"><span>inode</span><b class="mono">'+(n.k==='v'?'— (وهمي)':n.i)+'</b></div>'
+  +'<div class="frow"><span>الأذونات</span><b class="mono">'+(n.p||'drwxr-xr-x')+'</b></div>'
+  +'<div class="frow"><span>الحجم</span><b class="mono">'+(n.s||'4 KB')+'</b></div>'
+  +(n.t?'<div class="fnote">'+n.t+'</div>':'');
+}
+function add(node,path,parent){
+  node.c.forEach(ch=>{
+    const p=(path==='/'?'':path)+'/'+ch.n;
+    if(ch.k==='d'){
+      const det=document.createElement('details');if(ch.open)det.open=true;
+      const s=document.createElement('summary');
+      s.innerHTML='<span class="fname">'+ch.n+'/</span><span class="ftag">'+K.d+'</span>';
+      s.onclick=()=>show(ch,p);
+      det.appendChild(s);parent.appendChild(det);add(ch,p,det);
+    }else{
+      const r=document.createElement('div');r.className='ffile';
+      r.innerHTML='<span class="fname">'+ch.n+'</span><span class="ftag '+(ch.k==='d'?'':ch.k)+'">'+K[ch.k]+'</span>';
+      r.onclick=()=>show(ch,p);parent.appendChild(r);
+    }
+  });
+}
+add(DATA,'/',tree);
+})();
+
+/* ---------- 05 الذاكرة ---------- */
+(()=>{
+const stEl=$('#mstack'),hpEl=$('#mheap'),gap=$('#mgap'),glbl=$('#mglbl'),logEl=$('#mlog'),oom=$('#moom');
+const rspEl=$('#mrsp'),brkEl=$('#mbrk');
+const B={call:$('#bcall'),ret:$('#bret'),mal:$('#bmal'),fre:$('#bfre'),reset:$('#mreset')};
+const FN=['main()','read_input()','parse_line()','compute()','recurse()'];
+let frames=[],blocks=[],fn=0,mi=0,rsp=0x7FFDF3B0,brk=0x55A12000,dead=false;
+const GAP=170;
+const hx=v=>'0x'+v.toString(16).toUpperCase().padStart(8,'0').replace(/^(.{4})/,'$1_');
+const free=()=>GAP-frames.length*28-blocks.length*26;
+function sync(){
+  stEl.style.height=frames.length*28+'px';hpEl.style.height=blocks.length*26+'px';
+  const f=free();gap.style.height=Math.max(f,0)+'px';
+  glbl.textContent=f>90?'مساحة حرة ≈ '+Math.round(f*16.7)+' KB':f>40?'المنطقتان تقتربان…':'المساحة تنفد!';
+  gap.classList.toggle('warn',f<=40&&f>12);gap.classList.toggle('crit',f<=12);
+  rspEl.textContent=hx(rsp);brkEl.textContent=hx(brk);
+  stEl.innerHTML=frames.map(x=>'<div class="mframe"><span>'+x.n+'</span><span>'+hx(x.a)+'</span></div>').join('');
+  hpEl.innerHTML=blocks.map(x=>'<div class="mblock"><span>'+x.n+'</span><span>'+hx(x.a)+'</span></div>').join('');
+  B.call.disabled=dead;B.mal.disabled=dead;
+  B.ret.disabled=dead||!frames.length;B.fre.disabled=dead||!blocks.length;
+}
+function die(){dead=true;oom.hidden=false;logEl.textContent='فشل الحجز: التقت الكومة والمكدس — اضغط «إعادة تعيين».';sync();}
+B.call.onclick=()=>{
+  if(dead)return;if(free()-28<4)return die();
+  fn++;const n=FN[Math.min(fn,FN.length-1)]+(fn>=FN.length?' #'+(fn-FN.length+1):'');
+  frames.push({n:n,a:rsp-0x90});rsp-=0x90;
+  logEl.textContent='دُفع إطار '+n+' على المكدس — القمة الآن '+hx(rsp);sync();
+};
+B.ret.onclick=()=>{
+  if(dead||!frames.length)return;
+  const f=frames.pop();rsp+=0x90;fn=Math.max(0,fn-1);
+  logEl.textContent='return من '+f.n+' — أُزيل الإطار تلقائياً وعادت القمة إلى '+hx(rsp);sync();
+};
+B.mal.onclick=()=>{
+  if(dead)return;if(free()-26<4)return die();
+  mi++;blocks.push({n:'malloc(64KB) #'+mi,a:brk});brk+=0x10000;
+  logEl.textContent='حُجزت 64 KB — حد الكومة ارتفع إلى '+hx(brk);sync();
+};
+B.fre.onclick=()=>{
+  if(dead||!blocks.length)return;
+  const b=blocks.pop();brk-=0x10000;
+  logEl.textContent='free() — تحررت '+b.n+' وهبط الحد إلى '+hx(brk);sync();
+};
+B.reset.onclick=()=>{
+  frames=[];blocks=[];fn=0;mi=0;rsp=0x7FFDF3B0;brk=0x55A12000;dead=false;oom.hidden=true;
+  logEl.textContent='ذاكرة نظيفة — املأها من الجهتين واقترب منهما.';sync();
+};
+B.reset.click();
+})();
+
+/* ---------- 06 الافتراضية ---------- */
+(()=>{
+const segs=$$('#vseg button'),gEl=$('#vguests'),mid=$('#vmid'),host=$('#vhost');
+const ram=$('#vram'),boot=$('#vboot'),cores=$('#vcores'),add=$('#vadd'),clr=$('#vclr');
+let mode='vm';
+const NAMES={vm:['Ubuntu 24.04','Windows 11','FreeBSD 14','Debian 12','Fedora 40'],ct:['nginx','redis','postgres','python-app','alpine']};
+const C=['#2E5E4E','#31506F','#7A5A33','#5C4A6E','#A6402B'];
+const L={vm:[],ct:[]};
+function render(){
+  const l=L[mode];
+  gEl.innerHTML=l.length?'':'<div class="vempty">لا شيء بعد — أضف عنصراً وسترى كيف يتراص العتاد فوقه.</div>';
+  l.forEach((g,i)=>{
+    const d=document.createElement('div');d.className='vguest';d.style.setProperty('--gc',C[i%5]);
+    d.innerHTML='<button class="vx" title="حذف">×</button><b>'+g+'</b>'
+      +(mode==='vm'?'<span>نظام تشغيل كامل + نواة خاصة</span><span class="vsub">≈ 1.2 GB</span>'
+                   :'<span>عملية معزولة — بلا نواة</span><span class="vsub">≈ 8 MB</span>');
+    d.querySelector('.vx').onclick=()=>{l.splice(i,1);render();};
+    gEl.appendChild(d);
+  });
+  mid.textContent=mode==='vm'?'Hypervisor — يقسم العتاد الحقيقي ويعزل كل جهاز تماماً'
+                             :'محرك الحاويات — عزل خفيف عبر namespaces و cgroups';
+  host.hidden=mode!=='ct';
+  ram.textContent=l.length?(mode==='vm'?l.length*1200+' MB':l.length*8+' MB'):'0 MB';
+  boot.textContent=l.length?(mode==='vm'?'≈ 18 ثانية':'≈ 0.3 ثانية'):'—';
+  cores.textContent=!l.length?'—':(mode==='vm'?l.length+' نواة مستقلة':'نواة واحدة مشتركة');
+  add.disabled=l.length>=5;
+}
+segs.forEach(x=>x.onclick=()=>{segs.forEach(y=>y.classList.toggle('on',y===x));mode=x.dataset.m;render();});
+add.onclick=()=>{const l=L[mode];if(l.length>=5)return;l.push(NAMES[mode][l.length%5]);render();};
+clr.onclick=()=>{L[mode]=[];render();};
+render();
+})();
+</script>
+</body>
+</html>
