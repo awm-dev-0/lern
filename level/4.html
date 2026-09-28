@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operating Systems — شرح مبسط</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#111a2b;
+      --card2:#0f1727;
+      --text:#eef4ff;
+      --muted:#aab8cf;
+      --accent:#00e5a8;
+      --accent2:#55a8ff;
+      --border:#22304a;
+      --code:#09101c;
+      --danger:#ff6b7a;
+      --warning:#ffd166;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(0,229,168,.10), transparent 28%),
+        radial-gradient(circle at top left, rgba(85,168,255,.10), transparent 25%),
+        var(--bg);
+      color:var(--text);
+      line-height:1.85;
+    }
+    .container{width:min(1100px,92%);margin:auto}
+    header{
+      padding:70px 0 45px;
+      text-align:center;
+    }
+    .badge{
+      display:inline-block;
+      padding:7px 14px;
+      border:1px solid rgba(0,229,168,.3);
+      color:var(--accent);
+      border-radius:999px;
+      background:rgba(0,229,168,.07);
+      font-size:14px;
+    }
+    h1{font-size:clamp(34px,6vw,58px);margin:16px 0 10px}
+    .hero-text{color:var(--muted);max-width:780px;margin:auto;font-size:18px}
+    .overview{
+      margin:35px 0 55px;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:14px;
+    }
+    .mini{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:18px;
+      text-align:center;
+    }
+    .mini strong{display:block;font-size:23px;color:var(--accent)}
+    .mini span{color:var(--muted);font-size:14px}
+    section{
+      margin:28px 0;
+      background:rgba(17,26,43,.92);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:30px;
+      box-shadow:0 12px 35px rgba(0,0,0,.16);
+    }
+    .section-head{display:flex;gap:15px;align-items:center;margin-bottom:12px}
+    .num{
+      width:42px;height:42px;display:grid;place-items:center;
+      border-radius:12px;background:rgba(0,229,168,.12);
+      color:var(--accent);font-weight:800;font-size:18px;
+      flex:none;
+    }
+    h2{margin:0;font-size:28px}
+    h3{margin-top:28px;color:#fff}
+    p{margin:10px 0;color:#dce6f7}
+    .muted{color:var(--muted)}
+    .diagram{
+      display:grid;
+      gap:10px;
+      margin:24px auto;
+      max-width:760px;
+      text-align:center;
+    }
+    .box{
+      background:var(--card2);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:15px;
+      font-weight:700;
+    }
+    .arrow{color:var(--accent2);font-size:24px}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+    .item{
+      background:var(--card2);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:18px;
+    }
+    .item strong{color:var(--accent)}
+    code, pre{
+      direction:ltr;
+      text-align:left;
+      font-family:Consolas,Monaco,monospace;
+    }
+    pre{
+      background:var(--code);
+      border:1px solid #1b2940;
+      padding:17px;
+      border-radius:14px;
+      overflow:auto;
+      color:#dffcf3;
+    }
+    .callout{
+      margin:20px 0;
+      padding:16px 18px;
+      border-right:4px solid var(--accent);
+      background:rgba(0,229,168,.07);
+      border-radius:12px;
+    }
+    .warning{
+      border-right-color:var(--warning);
+      background:rgba(255,209,102,.07);
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+      overflow:hidden;
+      border-radius:14px;
+    }
+    th,td{
+      padding:13px 14px;
+      border-bottom:1px solid var(--border);
+      text-align:right;
+    }
+    th{background:#162238;color:var(--accent)}
+    tr:last-child td{border-bottom:none}
+    .final-map{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+      max-width:780px;
+      margin:22px auto 0;
+    }
+    .final-map .row{
+      display:grid;
+      grid-template-columns:1fr 50px 1fr;
+      align-items:center;
+      gap:10px;
+    }
+    .center{
+      text-align:center;color:var(--accent2);font-weight:900;
+    }
+    footer{
+      padding:40px 0 60px;
+      color:var(--muted);
+      text-align:center;
+    }
+    @media(max-width:800px){
+      .overview{grid-template-columns:repeat(2,1fr)}
+      .grid{grid-template-columns:1fr}
+      section{padding:22px}
+      .final-map .row{grid-template-columns:1fr}
+      .center{transform:rotate(90deg)}
+    }
+    @media(max-width:500px){
+      .overview{grid-template-columns:1fr}
+      header{padding-top:45px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">Operating Systems — للمبرمجين</span>
+      <h1>فهم نظام التشغيل بسهولة</h1>
+      <p class="hero-text">
+        الـOS هو المدير الرئيسي للكمبيوتر: ينظم البرامج، الذاكرة، المعالج، الملفات،
+        المستخدمين، الأجهزة والخدمات، ويحدد من يستطيع الوصول إلى ماذا.
+      </p>
+    </header>
+
+    <div class="overview">
+      <div class="mini"><strong>OS</strong><span>مدير الجهاز</span></div>
+      <div class="mini"><strong>Process</strong><span>برنامج يعمل</span></div>
+      <div class="mini"><strong>Permission</strong><span>ما المسموح به</span></div>
+      <div class="mini"><strong>Driver</strong><span>حلقة وصل مع الهاردوير</span></div>
+    </div>
+
+    <section>
+      <div class="section-head"><div class="num">1</div><h2>كيف يعمل الـ OS؟</h2></div>
+      <p>
+        الـOperating System هو البرنامج الأساسي الذي يعمل كوسيط بين التطبيقات والهاردوير.
+        التطبيق لا يتعامل عادةً مع مكونات الجهاز مباشرة؛ بل يطلب من نظام التشغيل، والنظام
+        ينسق الوصول إلى الموارد.
+      </p>
+
+      <div class="diagram">
+        <div class="box">أنت / المستخدم</div>
+        <div class="arrow">↓</div>
+        <div class="box">Application — مثل Chrome أو Python</div>
+        <div class="arrow">↓</div>
+        <div class="box">Operating System / Kernel</div>
+        <div class="arrow">↓</div>
+        <div class="box">Drivers</div>
+        <div class="arrow">↓</div>
+        <div class="box">Hardware — CPU / RAM / SSD / Network</div>
+      </div>
+
+      <div class="callout">
+        <strong>الفكرة الأساسية:</strong>
+        الـOS يمنع البرامج من امتلاك حرية مطلقة، وينظم استخدام CPU وRAM والملفات والأجهزة.
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div class="num">2</div><h2>Users — المستخدمون</h2></div>
+      <p>
+        نظام التشغيل يحتاج أن يعرف من يستخدم الجهاز لأن كل مستخدم قد يملك ملفات وإعدادات
+        وصلاحيات مختلفة.
+      </p>
+
+      <div class="grid">
+        <div class="item"><strong>Ahmed</strong><br>حساب شخصي وملفات خاصة.</div>
+        <div class="item"><strong>Administrator</strong><br>صلاحيات عالية لإدارة النظام.</div>
+        <div class="item"><strong>Guest</strong><br>صلاحيات محدودة.</div>
+        <div class="item"><strong>Groups</strong><br>يمكن وضع عدة مستخدمين في مجموعة ومنح المجموعة صلاحيات.</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div class="num">3</div><h2>Permissions — الصلاحيات</h2></div>
+      <p>الـPermission تجيب عن سؤال بسيط: <strong>هل هذا المستخدم أو البرنامج مسموح له بهذا الفعل؟</strong></p>
+
+      <div class="diagram">
+        <div class="box">User / Process</div>
+        <div class="arrow">↓</div>
+        <div class="box">طلب الوصول إلى ملف</div>
+        <div class="arrow">↓</div>
+        <div class="box">Permission Check</div>
+        <div class="arrow">↓</div>
+        <div class="box">✅ مسموح &nbsp;&nbsp; أو &nbsp;&nbsp; ❌ Permission Denied</div>
+      </div>
+
+      <h3>في Linux</h3>
+      <pre>rwx rwx rwx
+
+Owner   → rwx
+Group   → r-x
+Others  → r--</pre>
+
+      <p class="muted">
+        r = Read &nbsp;&nbsp; w = Write &nbsp;&nbsp; x = Execute
+      </p>
+
+      <pre>chmod 755 script.sh</pre>
+    </section>
+
+    <section>
+      <div class="section-head"><div class="num">4</div><h2>Processes — العمليات</h2></div>
+      <p>
+        الـProcess هو برنامج أثناء تشغيله. الملف الموجود على القرص هو البرنامج،
+        لكن عندما تشغله ينشئ النظام Process ويمنحه موارد مثل الذاكرة ووقت المعالج.
+      </p>
+
+      <div class="callout">
+        <strong>احفظها:</strong> Program = الكود الموجود على القرص،
+        Process = الكود أثناء التنفيذ.
+      </div>
+
+      <pre>Chrome.exe على القرص
+        ↓
+تشغيل
+        ↓
+Chrome Process
+        ↓
+Memory + CPU + Threads + Resources</pre>
+    </section>
+
+    <section>
+      <div class="section-head"><div class="num">5</div><h2>Services — الخدمات</h2></div>
+      <p>
+        الـService هو برنامج أو وظيفة تعمل غالبًا في الخلفية وتتم إدارتها بواسطة نظام
+        الخدمات. مثال: Web Server، Windows Update، Networking، Antivirus.
+      </p>
+
+      <div class="diagram">
+        <div class="box">Computer Starts</div>
+        <div class="arrow">↓</div>
+        <div class="box">Service Manager</div>
+        <div class="arrow">↓</div>
+        <div class="box">Service</div>
+        <div class="arrow">↓</div>
+        <div class="box">Process يعمل في الخلفية</div>
+      </div>
+
+      <h3>مثال Linux مع systemd</h3>
+      <pre>systemctl start nginx
+systemctl stop nginx
+systemctl status nginx</pre>
+
+      <div class="callout warning">
+        <strong>مهم:</strong> Service وProcess ليسا نفس الشيء.
+        الـService هو مفهوم لإدارة خدمة تعمل في الخلفية، وقد يؤدي تشغيل الخدمة إلى تشغيل Process أو أكثر.
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div class="num">6</div><h2>Environment Variables — متغيرات البيئة</h2></div>
+      <p>
+        هي قيم وإعدادات توفرها البيئة للبرنامج، غالبًا بالشكل:
+        <code>NAME=VALUE</code>.
+      </p>
+
+      <pre>PORT=3000
+NODE_ENV=production
+API_KEY=xxxxx
+PATH=...</pre>
+
+      <h3>مثال في JavaScript</h3>
+      <pre>const port = process.env.PORT;</pre>
+
+      <p>
+        بدل أن تثبت قيمة <code>3000</code> داخل الكود، تستطيع تغييرها حسب البيئة:
+      </p>
+
+      <pre>Development → PORT=3000
+Production  → PORT=8080</pre>
+
+      <div class="callout">
+        <strong>أشهر Variable:</strong> <code>PATH</code> — يحدد مسارات يمكن للنظام
+        البحث فيها عن البرامج التنفيذية.
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div class="num">7</div><h2>Drivers — التعريفات</h2></div>
+      <p>
+        الـDriver هو طبقة برمجية تساعد نظام التشغيل على التواصل مع جهاز أو مكون معين.
+      </p>
+
+      <div class="diagram">
+        <div class="box">Application / Game</div>
+        <div class="arrow">↓</div>
+        <div class="box">Operating System</div>
+        <div class="arrow">↓</div>
+        <div class="box">Driver</div>
+        <div class="arrow">↓</div>
+        <div class="box">Hardware — GPU / Wi-Fi / Audio / Printer</div>
+      </div>
+
+      <p>أمثلة:</p>
+      <div class="grid">
+        <div class="item">GPU Driver</div>
+        <div class="item">Audio Driver</div>
+        <div class="item">Wi-Fi Driver</div>
+        <div class="item">Bluetooth Driver</div>
+        <div class="item">Printer Driver</div>
+        <div class="item">Storage / USB Driver</div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div class="num">8</div><h2>Logs — السجلات</h2></div>
+      <p>
+        الـLogs هي سجل للأحداث التي تحدث في النظام أو البرامج. عندما تحصل مشكلة،
+        تساعدك السجلات على معرفة ماذا حدث ومتى وأين.
+      </p>
+
+      <pre>10:00 Server started
+10:01 User logged in
+10:03 Database connection failed
+10:04 Service restarted</pre>
+
+      <h3>Linux</h3>
+      <pre>journalctl
+journalctl -u nginx</pre>
+
+      <h3>Windows</h3>
+      <p>
+        توجد منظومة Windows Event Log ويمكن عرض الأحداث عبر Event Viewer.
+      </p>
+
+      <div class="callout">
+        بدل أن تقول: "السيرفر لا يعمل"، افتح الـLogs وابحث عن السبب الحقيقي.
+        مثال: <code>Port already in use</code>.
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div class="num">9</div><h2>كيف ترتبط كل الأشياء ببعضها؟</h2></div>
+
+      <div class="final-map">
+        <div class="row">
+          <div class="box">User</div><div class="center">→</div><div class="box">يشغل Application</div>
+        </div>
+        <div class="row">
+          <div class="box">Application</div><div class="center">→</div><div class="box">Process</div>
+        </div>
+        <div class="row">
+          <div class="box">Process</div><div class="center">→</div><div class="box">Environment + Permissions</div>
+        </div>
+        <div class="row">
+          <div class="box">Process / Service</div><div class="center">→</div><div class="box">OS + Kernel</div>
+        </div>
+        <div class="row">
+          <div class="box">Kernel</div><div class="center">→</div><div class="box">Drivers</div>
+        </div>
+        <div class="row">
+          <div class="box">Drivers</div><div class="center">→</div><div class="box">Hardware</div>
+        </div>
+        <div class="row">
+          <div class="box">System / Apps</div><div class="center">→</div><div class="box">Logs تسجل ما يحدث</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><div class="num">10</div><h2>ملخص سريع للحفظ</h2></div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>المصطلح</th>
+            <th>معناه ببساطة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>OS</td><td>المدير الرئيسي للكمبيوتر</td></tr>
+          <tr><td>User</td><td>الحساب أو الشخص الذي يستخدم النظام</td></tr>
+          <tr><td>Permission</td><td>ما الذي يُسمح للمستخدم أو البرنامج بفعله</td></tr>
+          <tr><td>Process</td><td>برنامج يعمل حاليًا</td></tr>
+          <tr><td>Service</td><td>وظيفة أو برنامج يعمل في الخلفية وتتم إدارته كخدمة</td></tr>
+          <tr><td>Environment Variable</td><td>إعداد أو قيمة توفرها البيئة للبرنامج</td></tr>
+          <tr><td>Driver</td><td>طبقة اتصال بين نظام التشغيل والهاردوير</td></tr>
+          <tr><td>Log</td><td>سجل يوضح ما حدث في النظام أو البرنامج</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <strong>كـمبرمج:</strong>
+        فهم هذه المفاهيم سيساعدك جدًا عندما تدخل Linux وServers وDocker وCloud
+        وBackend Deployment وDevOps وCybersecurity.
+      </div>
+    </section>
+
+    <footer>
+      Operating Systems — شرح مبسط للمراجعة السريعة
+    </footer>
+  </div>
+</body>
+</html>
