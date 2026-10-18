@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التقدم والإحصائيات | منصة الامتحانات</title><link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="light">
+<div class="app-container">
+    <aside>
+        <div class="logo-area"><div class="brand-lockup"><div class="brand-mark">IT</div><div><h2>منصة الامتحانات</h2><p>تعلّم • اختبر • تطوّر</p></div></div></div>
+        <p class="nav-caption">القائمة الرئيسية</p>
+        <ul class="nav-links"><li><a href="index.html"><span class="nav-icon">⌂</span>لوحة التحكم</a></li><li><a href="progress.html" class="active"><span class="nav-icon">↗</span>التقدم والإحصائيات</a></li><li><a href="settings.html"><span class="nav-icon">⚙</span>الإعدادات</a></li></ul>
+        <div class="sidebar-bottom"><strong>خطوتك التالية تبدأ هنا</strong>راجع نتائجك وتعلّم من كل محاولة.</div>
+    </aside>
+    <main>
+        <header><div><p class="page-eyebrow">قياس التطوّر</p><h1>التقدم وسجل المحاولات</h1><p class="page-description">كل محاولة تساعدك على فهم نقاط قوتك وما يحتاج إلى مراجعة.</p></div><div class="header-actions"><button class="theme-toggle" id="theme-toggle-btn" type="button">☾ الوضع الداكن</button></div></header>
+        <section class="content-panel">
+            <div class="panel-heading"><h2>سجل الامتحانات</h2><p>ستظهر هنا نتائج محاولاتك السابقة وتاريخ إجرائها.</p></div>
+            <div id="history-container"><div class="empty-state"><div class="empty-icon">▤</div><h3>جارٍ تحميل سجلّك</h3><p>نعرض لك محاولاتك ونتائجك المسجلة على هذا الجهاز.</p></div></div>
+        </section>
+    </main>
+</div>
+<script src="js/questions.data.js"></script><script src="js/app.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const historyContainer = document.getElementById('history-container');
+    let data = {};
+    try { data = JSON.parse(localStorage.getItem('it_exams_data') || '{}'); } catch (error) { data = {}; }
+    const attempts = Array.isArray(data.attempts) ? data.attempts : [];
+    if (attempts.length === 0) {
+        historyContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">◷</div><h3>لا توجد محاولات حتى الآن</h3><p>عندما تنهي أول امتحان، ستجد نتيجتك وتفاصيل محاولتك هنا.</p><a class="btn" href="index.html">استعراض الامتحانات</a></div>';
+        return;
+    }
+    const rows = attempts.slice().reverse().map(att => {
+        const examObj = IT_EXAMS.find(e => e.id === att.examId);
+        const examName = examObj ? examObj.title : att.examId;
+        const percent = att.total ? Math.round((att.score / att.total) * 100) : 0;
+        const date = String(att.date || '—');
+        return `<tr><td><span class="data-cell-title">${escapeHtml(examName)}</span></td><td>${Number(att.score) || 0} / ${Number(att.total) || 0}</td><td><span class="score-pill">${percent}%</span></td><td>${escapeHtml(date)}</td></tr>`;
+    }).join('');
+    historyContainer.innerHTML = `<div class="table-wrap"><table><thead><tr><th>اسم الامتحان</th><th>الدرجة</th><th>النسبة</th><th>التاريخ والوقت</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+});
+function escapeHtml(value) { return String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
+</script>
+</body>
+</html>

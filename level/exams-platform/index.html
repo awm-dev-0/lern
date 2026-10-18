@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#f5f7fb">
+    <title>لوحة التحكم | منصة الامتحانات التقنية</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-theme="light">
+    <div class="app-container">
+        <aside>
+            <div class="logo-area">
+                <div class="brand-lockup"><div class="brand-mark">IT</div><div><h2>منصة الامتحانات</h2><p>تعلّم • اختبر • تطوّر</p></div></div>
+            </div>
+            <p class="nav-caption">القائمة الرئيسية</p>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active"><span class="nav-icon">⌂</span>لوحة التحكم</a></li>
+                <li><a href="progress.html"><span class="nav-icon">↗</span>التقدم والإحصائيات</a></li>
+                <li><a href="settings.html"><span class="nav-icon">⚙</span>الإعدادات</a></li>
+            </ul>
+            <div class="sidebar-bottom"><strong>خطوتك التالية تبدأ هنا</strong>طوّر مهاراتك التقنية سؤالًا بعد سؤال.</div>
+        </aside>
+
+        <main>
+            <header>
+                <div><p class="page-eyebrow">مساحة التعلّم</p><h1>لوحة التحكم</h1><p class="page-description">تابع تقدمك وابدأ اختبارك التقني التالي.</p></div>
+                <div class="header-actions"><button class="theme-toggle" id="theme-toggle-btn" type="button">☾ الوضع الداكن</button></div>
+            </header>
+
+            <section class="welcome-panel" aria-label="ترحيب">
+                <div class="welcome-copy"><p class="welcome-kicker">أهلًا بك في منصتك التعليمية</p><h2>كل اختبار خطوة أقرب إلى الاحتراف.</h2><p>اختبر معلوماتك في أساسيات الحاسوب والتقنيات، راجع إجاباتك، واستخدم إحصائياتك لمعرفة ما تحتاج إلى تطويره.</p></div>
+                <div class="welcome-side"><span>مستواك الحالي</span><strong id="user-level-badge">جارٍ حساب المستوى...</strong></div>
+            </section>
+
+            <section class="stats-grid" aria-label="ملخص الأداء">
+                <article class="stat-card"><div class="stat-top"><h3>إجمالي الامتحانات</h3><span class="stat-icon">▤</span></div><div class="value" id="total-exams">4</div><span class="stat-note">اختبارات متاحة لك</span></article>
+                <article class="stat-card"><div class="stat-top"><h3>الامتحانات المكتملة</h3><span class="stat-icon">✓</span></div><div class="value" id="completed-exams">0</div><span class="stat-note">اختبارات أنهيتها</span></article>
+                <article class="stat-card"><div class="stat-top"><h3>لم تبدأ بعد</h3><span class="stat-icon">◷</span></div><div class="value" id="pending-exams">4</div><span class="stat-note">فرص جديدة للتعلّم</span></article>
+                <article class="stat-card"><div class="stat-top"><h3>متوسط الدرجات</h3><span class="stat-icon">％</span></div><div class="value" id="avg-score">0%</div><span class="stat-note">متوسط آخر محاولاتك</span></article>
+            </section>
+
+            <section aria-labelledby="available-exams-title">
+                <div class="section-heading"><div><h2 class="section-title" id="available-exams-title">الامتحانات المتاحة</h2><p class="section-subtitle">اختر موضوعًا وابدأ في قياس مستواك.</p></div><span class="exam-count">اختبارات تقنية</span></div>
+                <div class="exams-grid" id="exams-container"></div>
+            </section>
+        </main>
+    </div>
+    <script src="js/questions.data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
