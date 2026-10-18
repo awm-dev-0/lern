@@ -1,0 +1,1185 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>أساسيات الشبكات</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Reem+Kufi:wght@600;700&display=swap">
+<style>
+:root {
+  /* Layout: a fixed 1920x1080 stage scaled to the screen, one slide at a time, content revealed step by step.
+     Color = network layer (blue app, green transport, amber network, violet link, grey physical), the same on every slide. */
+  --bg: #060b17;
+  --stage: #0a1226;
+  --surface: #101c38;
+  --code: #0c1530;
+  --line: #2a3d68;
+  --ink: #eef3ff;
+  --muted: #a3b3d6;
+  --accent: #7aa2ff;
+  --err: #ff8a80;
+  --l-app: #7aa2ff;   --l-app-s: #14275a;
+  --l-trans: #4ade9a; --l-trans-s: #0e3a29;
+  --l-net: #ffb454;   --l-net-s: #40300f;
+  --l-link: #c3a1ff;  --l-link-s: #2f2056;
+  --l-phys: #9aa8c5;  --l-phys-s: #1f2b44;
+  --f-display: 'Reem Kufi', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --f-body: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); direction: rtl; overflow: hidden; position: relative; }
+button, input { font-family: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.vp { position: absolute; inset: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+.stagewrap { position: relative; min-height: 0; overflow: hidden; }
+.stage {
+  position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+  transform: translate(-50%, -50%) scale(var(--s, .5)); transform-origin: center;
+  background:
+    radial-gradient(1100px 700px at 90% -10%, #1a2f6a66, transparent 70%),
+    radial-gradient(900px 600px at -5% 105%, #0e3a2966, transparent 70%),
+    var(--stage);
+  border-radius: 28px; overflow: hidden; box-shadow: 0 30px 90px #000a; font-size: 40px; line-height: 1.6;
+}
+.stage::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(#ffffff12 2px, transparent 2.5px); background-size: 56px 56px; pointer-events: none; }
+
+/* slides */
+.slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; --sc: var(--accent);
+  transition: opacity .55s ease, transform .8s cubic-bezier(.2,.8,.2,1), visibility 0s .8s; }
+.slide.active { opacity: 1; visibility: visible; transition-delay: 0s; }
+.slide.before { transform: translateX(110px); }
+.slide.after { transform: translateX(-110px); }
+.sc-app { --sc: var(--l-app); } .sc-trans { --sc: var(--l-trans); } .sc-net { --sc: var(--l-net); } .sc-link { --sc: var(--l-link); }
+.k-app { --c: var(--l-app); --cs: var(--l-app-s); } .k-trans { --c: var(--l-trans); --cs: var(--l-trans-s); }
+.k-net { --c: var(--l-net); --cs: var(--l-net-s); } .k-link { --c: var(--l-link); --cs: var(--l-link-s); }
+.k-phys { --c: var(--l-phys); --cs: var(--l-phys-s); }
+
+/* reveal system */
+.r { opacity: 0; transform: translateY(34px); transform-box: fill-box; transform-origin: center;
+  transition: opacity .6s ease var(--d, 0s), transform .75s cubic-bezier(.2,.8,.2,1) var(--d, 0s), filter .5s ease, background-color .6s ease, border-color .6s ease; }
+.r.l { transform: translateX(-90px); } .r.rt { transform: translateX(90px); } .r.pop { transform: scale(.6); } .r.fade { transform: none; } .r.dn { transform: translateY(-70px); }
+.r.on { opacity: 1; transform: none; }
+.r.on.dim, .dim { opacity: .3; } .glow { filter: drop-shadow(0 0 16px var(--ic, #fff)); }
+.fx .draw { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .85s ease var(--d, 0s); }
+.fx.on .draw { stroke-dashoffset: 0; }
+.fx .hd { opacity: 0; transition: opacity .3s ease calc(var(--d, 0s) + .7s); }
+.fx.on .hd { opacity: 1; }
+.ul { width: 160px; height: 8px; border-radius: 4px; background: var(--sc); transform: scaleX(0); transform-origin: right; transition: transform .8s cubic-bezier(.2,.8,.2,1) .35s; }
+.ul.on { transform: none; }
+.dn { opacity: 0; transition: opacity .5s ease; color: var(--muted); } .dn.on { opacity: 1; }
+.ic g, .ic use { } svg.ic { width: 110px; height: 110px; color: var(--c, var(--ink)); flex: none; }
+g.ic { color: var(--ic, var(--ink)); }
+.v10 { --ic: var(--l-app); } .v20 { --ic: var(--l-trans); }
+
+/* header + body */
+.sh { position: absolute; top: 62px; right: 110px; left: 110px; }
+.eb { font: 500 28px var(--f-mono); letter-spacing: .16em; color: var(--sc); direction: ltr; text-align: right; }
+.sh h2 { font-family: var(--f-display); font-weight: 700; font-size: 84px; line-height: 1.2; margin: 2px 0 12px; text-wrap: balance; }
+.body { position: absolute; top: 262px; bottom: 70px; right: 110px; left: 110px; display: flex; flex-direction: column; }
+.capwrap { position: absolute; bottom: 46px; right: 110px; left: 110px; height: 134px; }
+.cap { position: absolute; inset: 0; display: flex; align-items: center; background: var(--surface); border: 3px solid var(--sc); border-radius: 24px; padding: 0 44px; font-size: 42px; line-height: 1.5; }
+.cw { display: block; }
+.cap b { color: var(--sc); } .cap.r { transform: translateY(20px); } .cap.r.on { transform: none; }
+
+/* shared parts */
+.mono { font-family: var(--f-mono); direction: ltr; unicode-bidi: isolate; display: inline-block; }
+.chip { display: inline-block; font: 500 28px var(--f-mono); padding: 2px 22px; border-radius: 999px; border: 2px solid var(--c, var(--line)); color: var(--c, var(--ink)); background: var(--cs, transparent); line-height: 1.6; }
+.card { background: var(--surface); border: 3px solid var(--c, var(--line)); border-radius: 28px; padding: 28px 36px; min-width: 0; }
+.card h3 { margin: 0 0 6px; font-size: 46px; color: var(--c, var(--ink)); line-height: 1.3; }
+.card p { margin: 0; font-size: 36px; color: var(--muted); line-height: 1.5; }
+.callout { font-size: 44px; line-height: 1.6; background: var(--surface); border: 3px solid var(--sc); border-radius: 26px; padding: 22px 40px; }
+.callout b { color: var(--sc); }
+.note { font-size: 38px; color: var(--muted); text-align: center; } .note b { color: var(--sc); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+.three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.dg { width: 100%; height: auto; display: block; direction: ltr; overflow: visible; }
+.dg text { font-family: var(--f-body); fill: var(--fc, var(--ink)); }
+.dg text.mono { font-family: var(--f-mono); }
+.dg .ln { stroke: var(--line); stroke-width: 5; stroke-linecap: round; }
+.dg .bx { fill: var(--bf, var(--surface)); stroke: var(--bs, var(--line)); stroke-width: 4; }
+.dg .ring { fill: none; stroke: var(--rc, var(--accent)); stroke-width: 5; visibility: hidden; transform-box: fill-box; transform-origin: center; opacity: 0; animation: ring 2.4s ease-out infinite; animation-delay: var(--rd, 0s); }
+.dg .ring.on { visibility: visible; }
+.mv { transition: transform 1.4s cubic-bezier(.6,0,.2,1); }
+.mv.mvd { transform: translateX(880px); } .mv.p1 { transform: translateX(380px); } .mv.p2 { transform: translateX(1000px); }
+@keyframes ring { 0% { transform: scale(.4); opacity: .8; } 100% { transform: scale(3.6); opacity: 0; } }
+@keyframes pk { 0% { transform: translateX(0); opacity: 0; } 12% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(440px); opacity: 0; } }
+@keyframes ak { 0% { transform: translateX(0); opacity: 0; } 12% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(-440px); opacity: 0; } }
+@keyframes pklost { 0% { transform: translateX(0); opacity: 0; } 10% { opacity: 1; } 42% { transform: translateX(210px); opacity: 1; } 52% { transform: translateX(240px); opacity: 0; } 100% { opacity: 0; } }
+@keyframes blink { 0%, 40% { opacity: 0; } 50%, 70% { opacity: 1; } 80%, 100% { opacity: 0; } }
+.pkt { animation: pk 3.6s linear infinite; animation-delay: var(--pd, 0s); opacity: 0; }
+.ack { animation: ak 3.6s linear infinite; animation-delay: var(--pd, 0s); opacity: 0; }
+.pkt.lost { animation-name: pklost; } .xmark { animation: blink 3.6s linear infinite; animation-delay: var(--pd, 0s); opacity: 0; }
+
+.harr { flex: none; width: 90px; height: 30px; color: var(--sc); } .harr path { stroke: currentColor; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+
+/* 1 + 32 title */
+.bgnet { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bgnet .ln { stroke: #2a3d6899; stroke-width: 3; } .bgnet .nd { animation: float 7s ease-in-out infinite; animation-delay: var(--fd, 0s); }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+.tt { position: absolute; right: 140px; top: 50%; transform: translateY(-50%); width: 1000px; display: flex; flex-direction: column; gap: 6px; }
+.kick { font: 500 30px var(--f-mono); letter-spacing: .2em; color: var(--sc); direction: ltr; text-align: right; }
+.tt h1 { font: 700 230px/1.05 var(--f-display); margin: 0; }
+.sub { font: 700 110px/1.2 var(--f-display); color: var(--sc); }
+.lead { font-size: 46px; color: var(--muted); margin: 18px 0 26px; }
+.keys { display: flex; flex-wrap: wrap; gap: 14px; } .keys .chip { font-size: 26px; color: var(--muted); }
+.endchips { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 26px; } .endchips .chip { font-size: 32px; }
+
+/* 2 roadmap */
+.road { display: flex; align-items: flex-start; gap: 14px; width: 100%; }
+.rg { flex: 1; min-width: 0; border: 3px solid var(--c); background: var(--cs); border-radius: 28px; padding: 26px 28px; }
+.rg h3 { margin: 0 0 14px; font-size: 44px; color: var(--c); }
+.rg ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.rg li { display: flex; align-items: center; gap: 16px; font: 500 32px var(--f-mono); direction: ltr; justify-content: flex-end; }
+.rg li b { order: 2; width: 54px; height: 54px; border-radius: 50%; background: var(--c); color: var(--bg); display: grid; place-items: center; font-size: 28px; flex: none; }
+
+/* 3 */
+.flow4 { display: flex; align-items: center; gap: 8px; }
+.fc { width: 330px; flex: none; text-align: center; border: 3px solid var(--c); background: var(--cs); border-radius: 28px; padding: 28px 18px; display: flex; flex-direction: column; align-items: center; gap: 14px; min-height: 410px; }
+.fc b { font-size: 36px; line-height: 1.4; } .fc .chip { font-size: 26px; margin-top: auto; }
+
+/* 4 layers */
+.layers { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.ly { display: grid; grid-template-columns: 64px 250px 250px 1fr 170px; align-items: center; gap: 14px; border: 3px solid var(--c); background: var(--cs); border-radius: 18px; padding: 0 24px; height: 84px; font-size: 32px; }
+.ly b { font: 500 44px var(--f-mono); color: var(--c); } .ly em { font: 500 28px var(--f-mono); font-style: normal; direction: ltr; text-align: right; }
+.ly u { text-decoration: none; font-weight: 600; } .ly span { color: var(--muted); font-size: 30px; }
+.ly i { font: 500 26px var(--f-mono); font-style: normal; text-align: center; border: 2px solid var(--c); border-radius: 999px; color: var(--c); }
+.side-arr { width: 260px; height: 640px; flex: none; direction: ltr; } .side-arr text { font-family: var(--f-body); }
+
+/* 5 encapsulation */
+.nestwrap { width: 940px; flex: none; display: flex; flex-direction: column; gap: 26px; }
+.nb { border: 4px solid transparent; border-radius: 26px; padding: 20px 26px 26px; display: flex; flex-direction: column; gap: 12px; transition: border-color .6s, background-color .6s; }
+.nb.show { border-color: var(--c); background: var(--cs); }
+.lb { display: flex; justify-content: space-between; align-items: baseline; opacity: 0; transition: opacity .6s .15s; direction: ltr; }
+.nb.show > .lb { opacity: 1; } .lb b { font: 500 32px var(--f-mono); color: var(--c); } .lb span { color: var(--muted); font-size: 28px; direction: rtl; }
+.core { background: var(--l-app); color: var(--bg); border-radius: 18px; text-align: center; padding: 26px; font: 700 44px var(--f-mono); }
+.bitsline { overflow: hidden; white-space: nowrap; direction: ltr; border: 2px solid var(--line); border-radius: 16px; padding: 10px 0; color: var(--l-phys); font: 500 32px var(--f-mono); }
+.bitsrun { display: inline-block; animation: run 16s linear infinite; } @keyframes run { from { transform: translateX(0); } to { transform: translateX(-45%); } }
+.steptxt { flex: 1; position: relative; min-height: 560px; min-width: 0; }
+.st { position: absolute; top: 20px; right: 0; left: 0; display: flex; flex-direction: column; gap: 20px; } .st p { margin: 0; font-size: 50px; line-height: 1.55; }
+.st .chip { align-self: flex-start; font-size: 32px; } .st code, p code { font: 500 .8em var(--f-mono); direction: ltr; unicode-bidi: isolate; display: inline-block; background: var(--code); padding: 0 12px; border-radius: 8px; }
+
+/* 6 map */
+.map { display: grid; grid-template-columns: 480px 110px 1fr; grid-template-rows: 46px repeat(7, 70px); gap: 6px 0; width: 100%; }
+.mh { font: 500 30px var(--f-mono); color: var(--muted); text-align: center; }
+.mc { border: 3px solid var(--c); background: var(--cs); border-radius: 16px; padding: 0 26px; display: flex; align-items: center; gap: 18px; font: 500 32px var(--f-mono); direction: ltr; min-width: 0; }
+.mc b { color: var(--c); font-weight: 500; }
+.mc.big2 { flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; } .mc.big2 b { font-size: 40px; } .mc.big2 small { font-size: 26px; color: var(--muted); }
+.lk { border: 4px solid var(--c); border-right: none; border-radius: 22px 0 0 22px; margin: 5px 0; }
+
+/* 7 tcp/udp */
+.tu { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.tuh { display: flex; justify-content: space-between; align-items: center; } .tuh h3 { font: 700 76px var(--f-mono); margin: 0; direction: ltr; }
+.tu ul { margin: 0; padding-inline-start: 36px; font-size: 36px; line-height: 1.55; } .tu li { color: var(--ink); }
+.tags { display: flex; flex-wrap: wrap; gap: 14px; justify-content: flex-start; } .tags span { border: 2px solid var(--c, var(--sc)); border-radius: 999px; padding: 0 22px; font-size: 32px; color: var(--c, var(--sc)); }
+
+/* 8 hand */
+.hand { width: 900px; flex: none; } .hr { flex: 1; min-width: 0; }
+.mini { font-size: 48px; margin: 0 0 4px; line-height: 1.4; } .hint { color: var(--muted); font-size: 36px; margin: 0; }
+.ports { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 22px; }
+.pr { display: flex; gap: 22px; align-items: baseline; border: 3px solid var(--l-trans); background: var(--l-trans-s); border-radius: 18px; padding: 10px 26px; }
+.pr b { font: 500 50px var(--f-mono); color: var(--l-trans); } .pr span { font: 500 32px var(--f-mono); }
+
+/* 10 mac */
+.macrow { display: flex; gap: 20px; justify-content: center; }
+.by { width: 166px; text-align: center; font: 500 80px/1.3 var(--f-mono); border: 3px solid var(--c); background: var(--cs); border-radius: 18px; }
+.brace { border: 4px solid var(--c); border-top: none; border-radius: 0 0 24px 24px; padding: 6px 0 0; text-align: center; font-size: 32px; color: var(--c); height: 70px; }
+.casts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; } .casts .card { padding: 14px 24px; text-align: center; } .casts h3 { font-size: 40px; margin: 0; } .casts p { font-size: 30px; }
+
+/* 11 arp */
+.arptbl { position: absolute; top: 0; left: 0; width: 640px; background: var(--surface); border: 3px solid var(--l-link); border-radius: 22px; overflow: hidden; }
+.arptbl .th, .mactbl .th { padding: 10px 24px; font-size: 30px; color: var(--muted); background: var(--code); } .arptbl .tr { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 12px 24px; font-size: 28px; }
+
+/* 12 ipv4 */
+.octrow { display: flex; align-items: flex-start; justify-content: center; }
+.oc { width: 310px; border: 3px solid var(--line); background: var(--surface); border-radius: 22px; text-align: center; padding: 14px 0; }
+.oc b { display: block; font: 500 100px/1.2 var(--f-mono); } .oc small { font: 500 30px var(--f-mono); color: var(--muted); letter-spacing: .1em; }
+.oc.isn { border-color: var(--l-net); background: var(--l-net-s); } .oc.ish { border-color: var(--l-trans); background: var(--l-trans-s); }
+.octrow > i { width: 40px; font: 700 100px/1.5 var(--f-mono); font-style: normal; text-align: center; color: var(--muted); }
+.strip, .cells { display: flex; justify-content: center; gap: 24px; direction: ltr; } .strip .g, .cells .g { display: flex; gap: 5px; }
+.strip i, .cells i { width: 34px; height: 54px; border-radius: 6px; background: var(--l-trans-s); border: 2px solid var(--l-trans); transition: background-color .5s, border-color .5s; }
+.strip i.n, .cells i.n { background: var(--l-net); border-color: var(--l-net); }
+
+/* 13 live */
+.tg { display: grid; grid-template-columns: repeat(8, 1fr); gap: 16px; max-width: 1500px; }
+.tg button { border: 3px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 22px; padding: 12px 0; cursor: pointer; display: grid; line-height: 1.3; font-family: var(--f-mono); }
+.tg button small { font-size: 30px; color: var(--muted); } .tg button b { font-size: 90px; font-weight: 500; }
+.tg button[aria-pressed="true"] { background: var(--l-net); border-color: var(--l-net); color: var(--bg); } .tg button[aria-pressed="true"] small { color: var(--bg); }
+.sumline { font: 500 60px var(--f-mono); } .sumline b { font-size: 100px; font-weight: 500; color: var(--l-net); }
+.btns { display: flex; flex-wrap: wrap; gap: 14px; } .btn { font-size: 34px; border: 3px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 16px; padding: 4px 32px; cursor: pointer; } .btn:hover { border-color: var(--accent); }
+.divl { height: 2px; background: var(--line); }
+.field { display: flex; gap: 30px; align-items: flex-end; flex-wrap: wrap; } .field label { display: grid; gap: 8px; font-size: 30px; color: var(--muted); }
+.field input { font: 500 52px var(--f-mono); direction: ltr; text-align: left; background: var(--surface); color: var(--ink); border: 3px solid var(--line); border-radius: 18px; padding: 8px 26px; width: 520px; } .field input.sm { width: 220px; }
+.octs { display: flex; gap: 16px; direction: ltr; } .octs .oct { border: 3px solid var(--line); background: var(--surface); border-radius: 18px; padding: 6px 24px; text-align: center; }
+.oct .dec { font: 500 54px var(--f-mono); display: block; line-height: 1.3; } .oct .bin { font: 500 28px var(--f-mono); color: var(--muted); }
+.err { color: var(--err); margin: 0; font-size: 34px; }
+
+/* 14 ranges */
+.big { font: 500 52px var(--f-mono); direction: ltr; text-align: right; margin-bottom: 4px; }
+.special { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; } .sp { border: 2px dashed var(--line); border-radius: 20px; padding: 14px 24px; } .sp .mono { font-size: 44px; color: var(--l-net); } .sp p { margin: 0; font-size: 32px; color: var(--muted); line-height: 1.4; }
+.why { display: flex; align-items: center; gap: 30px; font-size: 46px; border: 3px solid var(--sc); border-radius: 26px; padding: 18px 40px; background: var(--surface); } .why .mono { font-size: 92px; color: var(--l-net); }
+.aw { width: 130px; height: 34px; color: var(--sc); flex: none; }
+
+/* 15-16 ipv6 */
+.bars { display: flex; flex-direction: column; gap: 28px; } .brow { display: grid; grid-template-columns: 150px 1fr 600px; gap: 24px; align-items: center; font-size: 36px; } .brow b { font: 500 54px var(--f-mono); direction: ltr; }
+.trk4 { height: 60px; background: var(--surface); border: 2px solid var(--line); border-radius: 30px; overflow: hidden; direction: ltr; }
+.trk4 i { display: block; height: 100%; width: 0; border-radius: 30px; transition: width 1.8s cubic-bezier(.2,.8,.2,1) .4s; }
+.b4 { background: var(--l-net); } .b6 { background: linear-gradient(90deg, var(--l-app), var(--l-trans)); } .brow.on .b4 { width: 3%; } .brow.on .b6 { width: 100%; }
+.v6g { display: flex; justify-content: center; gap: 10px; align-items: center; } .v6g span { border: 3px solid var(--l-app); background: var(--l-app-s); border-radius: 16px; padding: 4px 14px; font: 500 54px var(--f-mono); } .v6g i { font: 700 54px var(--f-mono); font-style: normal; color: var(--muted); }
+.v6row { display: flex; flex-direction: column; gap: 4px; } .lab6 { font-size: 34px; color: var(--muted); }
+.v6t { font: 500 62px var(--f-mono); direction: ltr; text-align: center; } .v6t span { padding: 0 6px; border-radius: 10px; transition: background-color .5s, color .5s; }
+.f1 .z { opacity: .25; text-decoration: line-through; font-style: normal; transition: opacity .5s; } .z { font-style: normal; }
+.f2 .zr, .fin .zr { background: var(--l-net-s); color: var(--l-net); outline: 2px solid var(--l-net); }
+svg.dn { width: 50px; height: 58px; align-self: center; }
+
+/* 17-21 */
+.lead2 { font-size: 40px; color: var(--muted); margin: 0 0 6px; }
+.srow { display: flex; align-items: center; gap: 30px; width: 100%; } .slab { width: 430px; flex: none; display: flex; flex-direction: column; line-height: 1.3; } .slab b { font-size: 62px; } .slab span { font-size: 30px; color: var(--muted); }
+.sbar { flex: 1; display: flex; gap: 16px; height: 116px; } .sbar .blk { flex: 1; min-width: 0; border: 3px solid var(--c); background: var(--cs); border-radius: 18px; display: grid; place-items: center; font-size: 34px; color: var(--c); }
+.msteps { flex: 1; display: flex; flex-direction: column; gap: 22px; min-width: 0; } .ms { display: flex; gap: 26px; align-items: flex-start; border: 3px solid var(--c); background: var(--cs); border-radius: 26px; padding: 20px 30px; }
+.num { flex: none; width: 72px; height: 72px; border-radius: 50%; background: var(--c); color: var(--bg); display: grid; place-items: center; font: 700 40px var(--f-mono); }
+.ms b { font-size: 42px; } .ms p { margin: 0; font-size: 34px; color: var(--muted); } .ms .res { color: var(--ink); font-size: 38px; }
+.cheat { width: 820px; flex: none; border: 3px solid var(--line); border-radius: 26px; overflow: hidden; background: var(--surface); direction: ltr; }
+.ch { display: grid; grid-template-columns: 150px 1fr 150px; gap: 10px; padding: 12px 28px; font-size: 34px; } .ch.hd { color: var(--muted); font-size: 28px; background: var(--code); } .ch.hl { background: var(--l-trans-s); color: var(--l-trans); }
+dl.kv { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px 30px; margin: 0; } dl.kv dt { font-size: 28px; color: var(--muted); } dl.kv dd { margin: 0; font: 500 44px var(--f-mono); direction: ltr; text-align: right; }
+.bitsrow { direction: ltr; font: 500 54px var(--f-mono); letter-spacing: .04em; margin-top: 20px; } .legend { font-size: 30px; color: var(--muted); margin: 0; display: flex; gap: 40px; justify-content: center; } .sw { display: inline-block; width: 24px; height: 24px; border-radius: 6px; margin-inline-end: 12px; vertical-align: -2px; }
+.cdtop { display: flex; align-items: center; gap: 40px; } .pfx { font: 700 170px/1 var(--f-mono); color: var(--l-trans); min-width: 360px; text-align: center; }
+.cdst { display: flex; gap: 50px; } .cdst small { display: block; font-size: 30px; color: var(--muted); } .cdst b { font: 500 52px var(--f-mono); }
+.sumtbl { display: flex; flex-direction: column; gap: 12px; align-items: center; } .sr { display: grid; grid-template-columns: 520px 760px; gap: 30px; font-size: 44px; border: 2px solid var(--line); border-radius: 18px; padding: 10px 30px; background: var(--surface); }
+.bn em { font-style: normal; border-radius: 8px; padding: 0 6px; transition: background-color .6s, color .6s; } .hl .bn em { color: var(--l-trans); background: var(--l-trans-s); outline: 2px solid var(--l-trans); }
+.sumres { align-self: center; border: 4px solid var(--l-trans); background: var(--l-trans-s); border-radius: 26px; padding: 14px 60px; text-align: center; } .sumres .mono { font-size: 76px; color: var(--l-trans); display: block; } .sumres small { font-size: 34px; color: var(--muted); }
+
+/* 23-24 */
+.rt-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; } .dest { font-size: 48px; }
+.rtt { border: 3px solid var(--line); border-radius: 24px; overflow: hidden; background: var(--surface); }
+.rr { display: grid; grid-template-columns: 400px 280px 1fr; gap: 16px; padding: 14px 28px; font-size: 36px; border-bottom: 2px solid var(--line); align-items: center; transition: background-color .5s, opacity .5s, color .5s; } .rr.hd { color: var(--muted); font-size: 28px; background: var(--code); }
+.rr.hit { background: var(--l-app-s); } .rr.win { background: var(--l-trans-s); color: var(--l-trans); font-weight: 600; } .rr em { font-style: normal; font-size: 32px; opacity: 0; } .rr.win em { opacity: 1; }
+.types { width: 400px; flex: none; display: flex; flex-direction: column; gap: 18px; } .types .card { padding: 16px 30px; } .types h3 { font-size: 40px; margin: 0; } .types p { font-size: 32px; }
+.mactbl { width: 520px; flex: none; background: var(--surface); border: 3px solid var(--l-link); border-radius: 24px; overflow: hidden; }
+.mactbl .tr { display: grid; grid-template-columns: 1fr 90px 130px; gap: 10px; padding: 12px 24px; font-size: 30px; align-items: center; } .mactbl .tr.hd { color: var(--muted); font-size: 26px; } .mactbl em { font-style: normal; color: var(--l-link); font-size: 28px; }
+.three .card .ic + h3 { margin-top: 4px; } .three .card:has(.ic) { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; } .three .card:has(.ic) h3 { font-size: 54px; margin: 0; }
+
+/* 27-31 */
+.tagrow { display: flex; flex-direction: column; gap: 10px; } .tagf { display: flex; gap: 6px; font: 500 30px var(--f-mono); justify-content: center; } .tagf span { border: 2px solid var(--line); background: var(--surface); border-radius: 12px; padding: 6px 18px; } .tagf span.t { border-color: var(--l-net); background: var(--l-net-s); color: var(--l-net); }
+.natrow { display: grid; grid-template-columns: 780px 1fr; gap: 40px; align-items: start; } .nattbl { border: 3px solid var(--l-net); border-radius: 22px; overflow: hidden; background: var(--surface); }
+.nattbl .tr { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 10px 22px; font-size: 28px; direction: ltr; } .nattbl .tr.hd { color: var(--muted); font-size: 26px; background: var(--code); }
+.natcap { position: relative; font-size: 38px; min-height: 150px; } .natcap > div { position: absolute; inset: 0; display: flex; align-items: center; line-height: 1.5; } .natcap b { color: var(--l-net); }
+.shield { display: flex; gap: 40px; align-items: center; border: 3px solid var(--l-net); border-radius: 26px; padding: 22px 40px; background: var(--surface); } .shield .ic { width: 130px; height: 130px; color: var(--l-net); } .shield b { font-size: 46px; } .shield p { margin: 6px 0 0; font-size: 36px; color: var(--muted); line-height: 1.5; }
+.sm { display: grid; grid-template-columns: 90px 1fr 190px 200px 230px; gap: 18px; align-items: center; border: 3px solid var(--c); background: var(--cs); border-radius: 18px; padding: 8px 28px; min-height: 92px; font-size: 32px; line-height: 1.4; } .sm b { font-size: 56px; color: var(--c); font-weight: 500; }
+.sm.hd { border-color: transparent; background: transparent; color: var(--muted); min-height: 50px; font-size: 28px; }
+.jrow { display: flex; align-items: center; gap: 14px; } .jc { flex: 1; min-width: 0; position: relative; border: 3px solid var(--c); background: var(--cs); border-radius: 26px; padding: 30px 28px 24px; display: flex; flex-direction: column; gap: 8px; min-height: 320px; }
+.jc .n { position: absolute; top: -24px; right: 26px; width: 52px; height: 52px; border-radius: 50%; background: var(--c); color: var(--bg); display: grid; place-items: center; font: 700 30px var(--f-mono); }
+.jc .ic { width: 74px; height: 74px; } .jc b { font-size: 40px; line-height: 1.3; } .jc p { margin: 0; font-size: 30px; color: var(--muted); line-height: 1.45; } .jc .chip { font-size: 26px; margin-top: auto; align-self: flex-start; }
+
+/* controls + menu */
+.ctl { display: flex; align-items: center; gap: 12px; padding: 8px 16px; font-size: 16px; transition: opacity .4s; }
+.ctl button { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 14px; cursor: pointer; line-height: 1.4; } .ctl button:hover { border-color: var(--accent); }
+.ctl .nav { font-size: 20px; padding: 4px 18px; } .trk { flex: 1; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; } .trk i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .4s; }
+#cnt { font: 500 16px var(--f-mono); direction: ltr; min-width: 4.5em; text-align: center; color: var(--muted); }
+.vp.idle .ctl { opacity: 0; }
+.menu { position: fixed; inset: 0; background: #060b17f2; z-index: 20; overflow: auto; padding: 28px 16px; display: none; } .menu.open { display: block; }
+.menu .mg { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; max-width: 1300px; margin: 0 auto; }
+.menu button { text-align: start; font: inherit; font-size: 17px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; cursor: pointer; line-height: 1.5; } .menu button:hover, .menu button.cur { border-color: var(--accent); }
+.menu h2 { max-width: 1300px; margin: 0 auto 16px; font: 700 28px var(--f-display); } .menu button b { font: 500 14px var(--f-mono); color: var(--accent); margin-inline-end: 8px; }
+.bar { min-width: 0; }
+@media (max-width: 640px) { .ctl { gap: 8px; padding: 8px 12px; } .ctl button { padding: 6px 10px; } #b-fs { display: none; } #cnt { min-width: 4em; } }
+.rot { display: none; font-size: 14px; color: var(--muted); text-align: center; padding: 4px 16px; }
+@media (max-aspect-ratio: 1/1) and (max-width: 700px) { .rot { display: block; } }
+@media (prefers-reduced-motion: reduce) { .r, .slide, .mv { transition-duration: .01s !important; } .pkt, .ack, .ring, .bitsrun, .bgnet .nd, .xmark { animation: none !important; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-pc" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="10" width="48" height="32" rx="4"/><path d="M24 54h16M32 42v12"/></g></symbol>
+    <symbol id="i-laptop" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="14" width="40" height="28" rx="3"/><path d="M6 50h52l-4-8H10z"/></g></symbol>
+    <symbol id="i-router" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="34" width="52" height="18" rx="4"/><path d="M16 34L12 16M48 34l4-18M32 34V12"/></g><g fill="currentColor"><circle cx="16" cy="43" r="2.2"/><circle cx="25" cy="43" r="2.2"/></g></symbol>
+    <symbol id="i-switch" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="20" width="56" height="24" rx="4"/><rect x="11" y="28" width="7" height="8" rx="1"/><rect x="22" y="28" width="7" height="8" rx="1"/><rect x="33" y="28" width="7" height="8" rx="1"/><rect x="44" y="28" width="7" height="8" rx="1"/></g></symbol>
+    <symbol id="i-hub" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="9"/><path d="M32 23V8M32 41v15M23 32H8M41 32h15M26 26L14 14M38 26l12-12M26 38L14 50M38 38l12 12"/></g></symbol>
+    <symbol id="i-server" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="8" width="44" height="14" rx="3"/><rect x="10" y="25" width="44" height="14" rx="3"/><rect x="10" y="42" width="44" height="14" rx="3"/></g><g fill="currentColor"><circle cx="18" cy="15" r="2"/><circle cx="18" cy="32" r="2"/><circle cx="18" cy="49" r="2"/></g></symbol>
+    <symbol id="i-cloud" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 46h30a10 10 0 0 0 1-20 16 16 0 0 0-31-3 11 11 0 0 0 0 23z"/></g></symbol>
+    <symbol id="i-envelope" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="14" width="52" height="36" rx="4"/><path d="M6 18l26 20 26-20"/></g></symbol>
+    <symbol id="i-person" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="20" r="10"/><path d="M10 56c2-13 12-19 22-19s20 6 22 19"/></g></symbol>
+    <symbol id="i-lock" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="14" y="28" width="36" height="26" rx="4"/><path d="M22 28v-8a10 10 0 0 1 20 0v8"/><path d="M32 38v7"/></g></symbol>
+    <symbol id="i-truck" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h34v26H4zM38 26h12l8 8v10H38z"/><circle cx="16" cy="48" r="5"/><circle cx="46" cy="48" r="5"/></g></symbol>
+    <symbol id="i-building" viewBox="0 0 64 64"><g stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="8" width="40" height="48" rx="3"/><path d="M22 20h6M36 20h6M22 30h6M36 30h6M28 56V44h8v12"/></g></symbol>
+  </defs>
+</svg>
+
+<div class="vp" id="vp" dir="rtl" lang="ar">
+<div class="stagewrap" id="sw"><div class="stage" id="stage">
+<!-- ===== 1 TITLE ===== -->
+<section class="slide sc-app" data-title="الشبكات" data-steps="0">
+  <svg class="bgnet" viewBox="0 0 1920 1080" data-d="bgnet" aria-hidden="true"></svg>
+  <div class="tt">
+    <div class="kick r l">NETWORKING · STAGE 02</div>
+    <h1 class="r">الشبكات</h1>
+    <div class="sub r">أهم مرحلة</div>
+    <div class="ul"></div>
+    <p class="lead r">من نموذج OSI حتى NAT: 12 موضوعًا في 32 شريحة</p>
+    <div class="keys r"><span class="chip">← التالي</span><span class="chip">→ السابق</span><span class="chip">F ملء الشاشة</span><span class="chip">G القائمة</span></div>
+  </div>
+</section>
+
+<!-- ===== 2 ROADMAP ===== -->
+<section class="slide sc-app" data-title="خريطة الرحلة" data-steps="4">
+  <header class="sh"><div class="eb r l">ROADMAP</div><h2 class="r l">خريطة الرحلة</h2><div class="ul"></div></header>
+  <div class="body" style="justify-content:center"><div class="road">
+    <div class="rg k-app r" data-s="1"><h3>الأساس</h3><ul><li><b>1</b><span>OSI Model</span></li><li><b>2</b><span>TCP/IP Model</span></li></ul></div>
+    <i data-harr="2"></i>
+    <div class="rg k-net r" data-s="2"><h3>العناوين</h3><ul><li><b>3</b><span>MAC</span></li><li><b>4</b><span>ARP</span></li><li><b>5</b><span>IPv4</span></li><li><b>6</b><span>IPv6 basics</span></li></ul></div>
+    <i data-harr="3"></i>
+    <div class="rg k-trans r" data-s="3"><h3>تقسيم الشبكات</h3><ul><li><b>7</b><span>Subnetting</span></li><li><b>8</b><span>CIDR</span></li></ul></div>
+    <i data-harr="4"></i>
+    <div class="rg k-link r" data-s="4"><h3>نقل البيانات</h3><ul><li><b>9</b><span>Routing</span></li><li><b>10</b><span>Switching</span></li><li><b>11</b><span>VLAN</span></li><li><b>12</b><span>NAT</span></li></ul></div>
+  </div></div>
+</section>
+
+<!-- ===== 3 OSI IDEA ===== -->
+<section class="slide sc-app" data-title="OSI: الفكرة" data-steps="5">
+  <header class="sh"><div class="eb r l">01 · OSI MODEL</div><h2 class="r l">تخيّل أنك ترسل خطابًا</h2><div class="ul"></div></header>
+  <div class="body" style="justify-content:space-between">
+    <div class="flow4">
+      <div class="fc k-app r" data-s="1"><svg class="ic"><use href="#i-person"/></svg><b>تكتب الرسالة</b><span class="chip">7 · التطبيق</span></div>
+      <i data-harr="2"></i>
+      <div class="fc k-net r" data-s="2"><svg class="ic"><use href="#i-envelope"/></svg><b>تضعها في ظرف وتكتب العنوان</b><span class="chip">3 · الشبكة</span></div>
+      <i data-harr="3"></i>
+      <div class="fc k-link r" data-s="3"><svg class="ic"><use href="#i-building"/></svg><b>مكتب البريد يسلّمها للسيارة</b><span class="chip">2 · ربط البيانات</span></div>
+      <i data-harr="4"></i>
+      <div class="fc k-phys r" data-s="4"><svg class="ic"><use href="#i-truck"/></svg><b>السيارة تسير على الطريق</b><span class="chip">1 · الفيزيائية</span></div>
+    </div>
+    <div class="callout r pop" data-s="5">نموذج OSI هو نفس الفكرة لكن للبيانات: <b>7 مراحل</b>، لكل مرحلة وظيفة واحدة، وكل مرحلة تتعامل مع التي فوقها والتي تحتها فقط.</div>
+  </div>
+</section>
+
+<!-- ===== 4 OSI LAYERS ===== -->
+<section class="slide sc-app" data-title="OSI: الطبقات السبع" data-steps="4">
+  <header class="sh"><div class="eb r l">01 · OSI MODEL</div><h2 class="r l">الطبقات السبع</h2><div class="ul"></div></header>
+  <div class="body" style="flex-direction:row;gap:50px">
+    <div class="layers">
+      <div class="ly k-app r rt" data-s="4"><b>7</b><em>Application</em><u>التطبيقات</u><span>واجهة البرامج مع الشبكة</span><i>Data</i></div>
+      <div class="ly k-app r rt" data-s="4"><b>6</b><em>Presentation</em><u>العرض</u><span>ترميز · ضغط · تشفير</span><i>Data</i></div>
+      <div class="ly k-app r rt" data-s="4"><b>5</b><em>Session</em><u>الجلسة</u><span>فتح الجلسة وإنهاؤها</span><i>Data</i></div>
+      <div class="ly k-trans r rt" data-s="3"><b>4</b><em>Transport</em><u>النقل</u><span>المنافذ · TCP و UDP</span><i>Segment</i></div>
+      <div class="ly k-net r rt" data-s="2"><b>3</b><em>Network</em><u>الشبكة</u><span>عناوين IP · اختيار المسار</span><i>Packet</i></div>
+      <div class="ly k-link r rt" data-s="1"><b>2</b><em>Data Link</em><u>ربط البيانات</u><span>عناوين MAC · الإطارات</span><i>Frame</i></div>
+      <div class="ly k-phys r rt" data-s="1"><b>1</b><em>Physical</em><u>الفيزيائية</u><span>إشارات على الكابل</span><i>Bits</i></div>
+    </div>
+    <svg class="side-arr" viewBox="0 0 260 640" data-d="osiarrows"></svg>
+  </div>
+</section>
+
+<!-- ===== 5 ENCAPSULATION ===== -->
+<section class="slide sc-net" data-title="OSI: التغليف" data-steps="5">
+  <header class="sh"><div class="eb r l">01 · OSI MODEL</div><h2 class="r l">التغليف: رحلة الرسالة</h2><div class="ul"></div></header>
+  <div class="body" style="flex-direction:row;gap:60px;align-items:flex-start">
+    <div class="nestwrap">
+      <div class="nest">
+        <div class="nb k-link" data-cls="4:show"><div class="lb"><b>Frame</b><span>ترويسة MAC</span></div>
+          <div class="nb k-net" data-cls="3:show"><div class="lb"><b>Packet</b><span>ترويسة IP</span></div>
+            <div class="nb k-trans" data-cls="2:show"><div class="lb"><b>Segment</b><span>ترويسة TCP / UDP</span></div>
+              <div class="core r pop" data-s="1">Data · رسالتك</div>
+            </div></div></div>
+      </div>
+      <div class="bitsline r" data-s="5"><div class="bitsrun">0110 1000 1110 0101 0011 1010 1100 0110 0101 1001 0111 0010 1011 0001 1101 0100 0110 1000 1110 0101 0011 1010 1100 0110</div></div>
+    </div>
+    <div class="steptxt">
+      <div class="st r l" data-s="1" data-e="1"><span class="chip k-app">Data</span><p>الرسالة الأصلية من برنامجك، مثل طلب صفحة ويب.</p></div>
+      <div class="st r l" data-s="2" data-e="2"><span class="chip k-trans">طبقة 4</span><p>تضيف ترويسة فيها <b>رقم المنفذ</b>. الناتج: <code>Segment</code>.</p></div>
+      <div class="st r l" data-s="3" data-e="3"><span class="chip k-net">طبقة 3</span><p>تضيف ترويسة فيها <b>عنوان IP</b>. الناتج: <code>Packet</code>.</p></div>
+      <div class="st r l" data-s="4" data-e="4"><span class="chip k-link">طبقة 2</span><p>تضيف ترويسة فيها <b>عنوان MAC</b>. الناتج: <code>Frame</code>.</p></div>
+      <div class="st r l" data-s="5"><span class="chip k-phys">طبقة 1</span><p>تحوّل الإطار إلى <b>بتات وإشارات</b> على الكابل. وعند الاستقبال تفتح كل طبقة ظرفها بالعكس.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 6 TCP/IP MAP ===== -->
+<section class="slide sc-trans" data-title="TCP/IP: أربع طبقات" data-steps="3">
+  <header class="sh"><div class="eb r l">02 · TCP/IP MODEL</div><h2 class="r l">الإنترنت يعمل بأربع طبقات</h2><div class="ul"></div></header>
+  <div class="body" style="gap:24px">
+    <div class="map">
+      <div class="mh" style="grid-row:1;grid-column:1">OSI</div><div class="mh" style="grid-row:1;grid-column:3">TCP/IP</div>
+      <div class="mc k-app r rt" data-s="1" style="grid-row:2;grid-column:1"><b>7</b>Application</div>
+      <div class="mc k-app r rt" data-s="1" style="grid-row:3;grid-column:1"><b>6</b>Presentation</div>
+      <div class="mc k-app r rt" data-s="1" style="grid-row:4;grid-column:1"><b>5</b>Session</div>
+      <div class="mc k-trans r rt" data-s="1" style="grid-row:5;grid-column:1"><b>4</b>Transport</div>
+      <div class="mc k-net r rt" data-s="1" style="grid-row:6;grid-column:1"><b>3</b>Network</div>
+      <div class="mc k-link r rt" data-s="1" style="grid-row:7;grid-column:1"><b>2</b>Data Link</div>
+      <div class="mc k-phys r rt" data-s="1" style="grid-row:8;grid-column:1"><b>1</b>Physical</div>
+      <div class="lk k-app r fade" data-s="2" style="grid-row:2 / 5;grid-column:2"></div>
+      <div class="lk k-trans r fade" data-s="2" style="grid-row:5;grid-column:2"></div>
+      <div class="lk k-net r fade" data-s="2" style="grid-row:6;grid-column:2"></div>
+      <div class="lk k-link r fade" data-s="2" style="grid-row:7 / 9;grid-column:2"></div>
+      <div class="mc big2 k-app r l" data-s="2" style="grid-row:2 / 5;grid-column:3"><b>Application</b><small>HTTP · HTTPS · DNS · DHCP · SSH · SMTP</small></div>
+      <div class="mc big2 k-trans r l" data-s="2" style="grid-row:5;grid-column:3"><b>Transport</b><small>TCP · UDP</small></div>
+      <div class="mc big2 k-net r l" data-s="2" style="grid-row:6;grid-column:3"><b>Internet</b><small>IP · ICMP</small></div>
+      <div class="mc big2 k-link r l" data-s="2" style="grid-row:7 / 9;grid-column:3"><b>Network Access</b><small>Ethernet · Wi-Fi · MAC</small></div>
+    </div>
+    <div class="callout r pop" data-s="3">OSI نموذج للتعلّم والشرح. TCP/IP هو ما يعمل به الإنترنت فعلًا.</div>
+  </div>
+</section>
+
+<!-- ===== 7 TCP vs UDP ===== -->
+<section class="slide sc-trans" data-title="TCP مقابل UDP" data-steps="2">
+  <header class="sh"><div class="eb r l">02 · TCP/IP MODEL</div><h2 class="r l">TCP أم UDP؟</h2><div class="ul"></div></header>
+  <div class="body" style="flex-direction:row;gap:40px;align-items:stretch">
+    <div class="card k-trans r rt tu" data-s="1">
+      <div class="tuh"><h3>TCP</h3><span class="chip">الخطاب المسجّل</span></div>
+      <svg class="dg" viewBox="0 0 780 220" data-d="tcp"></svg>
+      <ul><li>يفتح اتصالًا قبل الإرسال</li><li>يرقّم الأجزاء ويطلب إعادة ما ضاع</li><li>أبطأ قليلًا لكنه موثوق</li></ul>
+      <div class="tags"><span>ويب</span><span>بريد</span><span>ملفات</span></div>
+    </div>
+    <div class="card k-net r l tu" data-s="2">
+      <div class="tuh"><h3>UDP</h3><span class="chip">بطاقة البريد</span></div>
+      <svg class="dg" viewBox="0 0 780 220" data-d="udp"></svg>
+      <ul><li>يرسل فورًا بلا اتصال</li><li>بلا تأكيد استلام، وقد يضيع جزء</li><li>سريع وخفيف</li></ul>
+      <div class="tags"><span>مكالمات</span><span>ألعاب</span><span>DNS</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 8 HANDSHAKE ===== -->
+<section class="slide sc-trans" data-title="المصافحة الثلاثية والمنافذ" data-steps="4">
+  <header class="sh"><div class="eb r l">02 · TCP/IP MODEL</div><h2 class="r l">المصافحة الثلاثية</h2><div class="ul"></div></header>
+  <div class="body" style="flex-direction:row;gap:60px;align-items:flex-start">
+    <svg class="dg hand" viewBox="0 0 900 640" data-d="hand"></svg>
+    <div class="hr">
+      <div class="callout r l" data-s="0" data-e="3">قبل نقل أي بيانات، يتفق الطرفان على بدء الاتصال في <b>ثلاث رسائل</b>.</div>
+      <div class="r l" data-s="4">
+        <h3 class="mini">المنفذ يحدد البرنامج، والـ IP يحدد الجهاز</h3>
+        <p class="hint">مثل عنوان العمارة ثم رقم الشقة.</p>
+        <div class="ports">
+          <div class="pr"><b>80</b><span>HTTP</span></div><div class="pr"><b>443</b><span>HTTPS</span></div>
+          <div class="pr"><b>53</b><span>DNS</span></div><div class="pr"><b>22</b><span>SSH</span></div>
+          <div class="pr"><b>25</b><span>SMTP</span></div><div class="pr"><b>67/68</b><span>DHCP</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 9 MAC IDEA ===== -->
+<section class="slide sc-link" data-title="MAC: الاسم الثابت" data-steps="2">
+  <header class="sh"><div class="eb r l">03 · MAC ADDRESS</div><h2 class="r l">MAC هو اسم جهازك</h2><div class="ul"></div></header>
+  <div class="body" style="gap:20px">
+    <div class="two">
+      <div class="card k-link r rt" data-s="0"><h3>MAC · الاسم</h3><p>ثابت، مكتوب على كرت الشبكة من المصنع.</p></div>
+      <div class="card k-net r l" data-s="0"><h3>IP · العنوان</h3><p>مكان سكنك الحالي، يتغير حسب الشبكة.</p></div>
+    </div>
+    <svg class="dg" viewBox="0 0 1700 360" data-d="mac"></svg>
+  </div>
+  <div class="capwrap">
+    <div class="cap r" data-s="1" data-e="1">الجهاز في البيت: اسمه <b>MAC</b> وعنوانه <b>IP</b>.</div>
+    <div class="cap r" data-s="2">انتقل إلى المقهى: <b>الاسم لم يتغير</b>، لكن العنوان تغيّر.</div>
+  </div>
+</section>
+
+<!-- ===== 10 MAC STRUCTURE ===== -->
+<section class="slide sc-link" data-title="MAC: التركيب وأنواع الإرسال" data-steps="3">
+  <header class="sh"><div class="eb r l">03 · MAC ADDRESS</div><h2 class="r l">تركيب العنوان وأنواع الإرسال</h2><div class="ul"></div></header>
+  <div class="body" style="gap:14px">
+    <div class="macrow" dir="ltr">
+      <span class="by k-link r pop" data-s="1">00</span><span class="by k-link r pop" data-s="1">1A</span><span class="by k-link r pop" data-s="1">2B</span>
+      <span class="by k-trans r pop" data-s="1">3C</span><span class="by k-trans r pop" data-s="1">4D</span><span class="by k-trans r pop" data-s="1">5E</span>
+    </div>
+    <div class="macrow" dir="ltr">
+      <div class="brace k-link r" data-s="2" style="width:calc(3 * 186px - 20px)"><span>OUI · الشركة المصنّعة (24 بت)</span></div>
+      <div class="brace k-trans r" data-s="2" style="width:calc(3 * 186px - 20px)"><span>رقم الكرت (24 بت)</span></div>
+    </div>
+    <div class="casts">
+      <div class="card k-link r" data-s="3"><h3>Unicast</h3><svg class="dg" viewBox="0 0 500 250" data-d="cast" data-v="u" data-st="3"></svg><p>إلى جهاز واحد</p></div>
+      <div class="card k-link r" data-s="3"><h3>Multicast</h3><svg class="dg" viewBox="0 0 500 250" data-d="cast" data-v="m" data-st="3"></svg><p>إلى مجموعة أجهزة</p></div>
+      <div class="card k-net r" data-s="3"><h3>Broadcast</h3><svg class="dg" viewBox="0 0 500 250" data-d="cast" data-v="b" data-st="3"></svg><p><span class="mono">FF:FF:FF:FF:FF:FF</span> للجميع</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 11 ARP ===== -->
+<section class="slide sc-link" data-title="ARP: من يملك هذا العنوان؟" data-steps="5">
+  <header class="sh"><div class="eb r l">04 · ARP</div><h2 class="r l">ARP: نادِ على الجميع</h2><div class="ul"></div></header>
+  <div class="body" style="position:absolute">
+    <svg class="dg" viewBox="0 0 1700 620" data-d="arp"></svg>
+    <div class="arptbl r l" data-s="5"><div class="th">ARP Cache في A</div><div class="tr"><span class="mono">192.168.1.20</span><span class="mono">00:1A:2B:3C:4D:0B</span></div></div>
+  </div>
+  <div class="capwrap">
+    <div class="cap r" data-s="0" data-e="0">A يريد مراسلة <span class="mono">192.168.1.20</span> لكنه لا يعرف MAC صاحبه. كأنك تنادي في قاعة: من هو أحمد؟</div>
+    <div class="cap r" data-s="1" data-e="1">A يسأل <b>الجميع (Broadcast)</b>: من يملك 192.168.1.20؟</div>
+    <div class="cap r" data-s="2" data-e="2">السويتش يوصّل السؤال إلى كل الأجهزة.</div>
+    <div class="cap r" data-s="3" data-e="3"><b>C وD</b> تتجاهلان السؤال. <b>B</b> يعرف أنه المقصود.</div>
+    <div class="cap r" data-s="4" data-e="4">B يرد على A وحده <b>(Unicast)</b> بعنوان MAC الخاص به.</div>
+    <div class="cap r" data-s="5">A يحفظ الإجابة في <b>ARP Cache</b>، فلا يسأل مرة أخرى.</div>
+  </div>
+</section>
+
+<!-- ===== 12 IPv4 STRUCTURE ===== -->
+<section class="slide sc-net" data-title="IPv4: التركيب" data-steps="4">
+  <header class="sh"><div class="eb r l">05 · IPv4</div><h2 class="r l">عنوان البيت: الشارع + الرقم</h2><div class="ul"></div></header>
+  <div class="body" style="gap:22px">
+    <div class="octrow" dir="ltr">
+      <div class="oc r pop" data-s="1" data-cls="2-9:isn"><b>192</b><small>11000000</small></div><i>.</i>
+      <div class="oc r pop" data-s="1" data-cls="2-9:isn"><b>168</b><small>10101000</small></div><i>.</i>
+      <div class="oc r pop" data-s="1" data-cls="2-9:isn"><b>1</b><small>00000001</small></div><i>.</i>
+      <div class="oc r pop" data-s="1" data-cls="2-9:ish"><b>10</b><small>00001010</small></div>
+    </div>
+    <div class="octrow" dir="ltr">
+      <div class="brace k-net r" data-s="2" style="width:calc(3 * 310px + 2 * 40px)"><span>الشبكة · اسم الشارع</span></div>
+      <div class="brace k-trans r" data-s="2" style="width:310px;margin-inline-start:40px"><span>الجهاز · رقم البيت</span></div>
+    </div>
+    <div class="strip r" data-s="3" dir="ltr" data-d="strip24"></div>
+    <div class="callout r pop" data-s="3" style="align-self:center">الماسك <span class="mono">/24</span> يعني: أول 24 بتًا للشبكة، والباقي للأجهزة.</div>
+    <div class="note r fade" data-s="4">العنوان = <b>32 بتًا</b> = 4 أجزاء × 8 بتات · كل جزء من 0 إلى 255</div>
+  </div>
+</section>
+
+<!-- ===== 13 IPv4 LIVE ===== -->
+<section class="slide sc-net live" data-title="IPv4: جرّب بالبتات" data-steps="0">
+  <header class="sh"><div class="eb r l">05 · IPv4 · LIVE</div><h2 class="r l">اضغط على البتات وابنِ الرقم</h2><div class="ul"></div></header>
+  <div class="body" style="gap:26px;justify-content:center">
+    <div class="tg" id="tg" dir="ltr" role="group" aria-label="8 بتات"></div>
+    <div class="sumline" id="tg-sum" dir="ltr"></div>
+    <div class="btns" id="tg-pre"></div>
+    <div class="divl"></div>
+    <div class="field">
+      <label for="ip-in">أو اكتب عنوانًا كاملًا<input id="ip-in" type="text" value="192.168.1.10" inputmode="decimal" autocomplete="off" spellcheck="false"></label>
+      <div id="ip-out" aria-live="polite" style="flex:1"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 14 IPv4 RANGES ===== -->
+<section class="slide sc-net" data-title="IPv4: خاص وعام" data-steps="3">
+  <header class="sh"><div class="eb r l">05 · IPv4</div><h2 class="r l">عناوين خاصة وعناوين عامة</h2><div class="ul"></div></header>
+  <div class="body" style="gap:28px;justify-content:center">
+    <div class="three">
+      <div class="card k-net r" data-s="1"><div class="mono big">10.0.0.0/8</div><p>الشركات الكبيرة</p></div>
+      <div class="card k-net r" data-s="1"><div class="mono big">172.16.0.0/12</div><p>من 172.16 إلى 172.31</p></div>
+      <div class="card k-net r" data-s="1"><div class="mono big">192.168.0.0/16</div><p>الأشهر في البيوت</p></div>
+    </div>
+    <div class="special r" data-s="2">
+      <div class="sp"><span class="mono">127.0.0.1</span><p>Loopback · الجهاز يخاطب نفسه</p></div>
+      <div class="sp"><span class="mono">169.254.x.x</span><p>APIPA · لم يستجب DHCP</p></div>
+      <div class="sp"><span class="mono">0.0.0.0</span><p>غير محدد · أو مسار افتراضي</p></div>
+    </div>
+    <div class="why r pop" data-s="3"><span class="mono">4.3</span><b>مليار عنوان فقط</b><svg class="aw" viewBox="0 0 160 40"><path d="M150 20H30" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M44 6L24 20l20 14" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg><div><b>NAT</b> حل مؤقت · <b>IPv6</b> حل دائم</div></div>
+  </div>
+</section>
+
+<!-- ===== 15 IPv6 WHY ===== -->
+<section class="slide sc-app" data-title="IPv6: لماذا؟" data-steps="3">
+  <header class="sh"><div class="eb r l">06 · IPv6</div><h2 class="r l">عناوين لا تنتهي</h2><div class="ul"></div></header>
+  <div class="body" style="gap:36px;justify-content:center">
+    <div class="bars">
+      <div class="brow r l" data-s="1"><b>IPv4</b><div class="trk4"><i class="b4"></i></div><span>32 بت · 4.3 مليار</span></div>
+      <div class="brow r l" data-s="2"><b>IPv6</b><div class="trk4"><i class="b6"></i></div><span>128 بت · <span class="mono">3.4 × 10<sup>38</sup></span></span></div>
+    </div>
+    <div class="callout r pop" data-s="2" style="align-self:flex-start">أكبر من IPv4 بنحو <span class="mono">7.9 × 10<sup>28</sup></span> مرة.</div>
+    <div class="v6g r" data-s="3" dir="ltr">
+      <span>2001</span><i>:</i><span>0db8</span><i>:</i><span>0000</span><i>:</i><span>0000</span><i>:</i><span>0000</span><i>:</i><span>ff00</span><i>:</i><span>0042</span><i>:</i><span>8329</span>
+    </div>
+    <div class="note r fade" data-s="3">8 مجموعات × 16 بت، تُكتب بنظام Hex</div>
+  </div>
+</section>
+
+<!-- ===== 16 IPv6 SHORTEN ===== -->
+<section class="slide sc-app" data-title="IPv6: الاختصار" data-steps="3">
+  <header class="sh"><div class="eb r l">06 · IPv6</div><h2 class="r l">كيف نختصر العنوان؟</h2><div class="ul"></div></header>
+  <div class="body" style="gap:14px">
+    <div class="v6row" data-cls="1-9:f1;2-9:f2">
+      <div class="lab6 r" data-s="0">العنوان الكامل</div>
+      <div class="v6t" dir="ltr"><span>2001</span>:<span><em class="z">0</em>db8</span>:<span class="zr">0000</span>:<span class="zr">0000</span>:<span class="zr">0000</span>:<span>ff00</span>:<span><em class="z">00</em>42</span>:<span>8329</span></div>
+    </div>
+    <svg class="dn r" data-s="1" viewBox="0 0 60 70"><path d="M30 6V50" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M12 36l18 20 18-20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <div class="v6row r" data-s="1"><div class="lab6">1 · احذف الأصفار اليسرى</div><div class="v6t" dir="ltr">2001:db8:<span class="zr">0</span>:<span class="zr">0</span>:<span class="zr">0</span>:ff00:42:8329</div></div>
+    <svg class="dn r" data-s="2" viewBox="0 0 60 70"><path d="M30 6V50" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M12 36l18 20 18-20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <div class="v6row r" data-s="2" data-cls="2-9:f2"><div class="lab6">2 · استبدل أطول سلسلة أصفار بـ <span class="mono">::</span> (مرة واحدة فقط)</div><div class="v6t fin" dir="ltr">2001:db8<span class="zr">::</span>ff00:42:8329</div></div>
+    <div class="tags r" data-s="3" style="margin-top:10px"><span class="mono">::1 · Loopback</span><span class="mono">fe80:: · Link-Local</span><span class="mono">2000::/3 · Global</span><span>بلا Broadcast</span></div>
+  </div>
+</section>
+<!-- ===== 17 SUBNET IDEA ===== -->
+<section class="slide sc-trans" data-title="Subnetting: الفكرة" data-steps="3">
+  <header class="sh"><div class="eb r l">07 · SUBNETTING</div><h2 class="r l">قسّم الشبكة الكبيرة</h2><div class="ul"></div></header>
+  <div class="body" style="gap:10px">
+    <p class="lead2 r">شركة فيها 200 موظف في قاعة واحدة: الجميع يسمع الجميع. الحل: أقسام، لكل قسم غرفته.</p>
+    <div class="srow r" data-s="1"><div class="slab"><b class="mono">/24</b><span>شبكة واحدة · 256 عنوانًا</span></div>
+      <div class="sbar"><div class="blk k-app"><span class="mono">.0 – .255</span></div></div></div>
+    <svg class="dn" data-s="2" viewBox="0 0 60 70"><path d="M30 6V50" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M12 36l18 20 18-20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <div class="srow r" data-s="2"><div class="slab"><b class="mono">/25</b><span>شبكتان · 128 عنوانًا لكل منهما</span></div>
+      <div class="sbar"><div class="blk k-app"><span class="mono">.0 – .127</span></div><div class="blk k-trans"><span class="mono">.128 – .255</span></div></div></div>
+    <svg class="dn" data-s="3" viewBox="0 0 60 70"><path d="M30 6V50" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M12 36l18 20 18-20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <div class="srow r" data-s="3"><div class="slab"><b class="mono">/26</b><span>4 شبكات · 64 عنوانًا لكل منها</span></div>
+      <div class="sbar"><div class="blk k-app"><span class="mono">.0 – .63</span></div><div class="blk k-trans"><span class="mono">.64 – .127</span></div><div class="blk k-net"><span class="mono">.128 – .191</span></div><div class="blk k-link"><span class="mono">.192 – .255</span></div></div></div>
+  </div>
+</section>
+
+<!-- ===== 18 SUBNET METHOD ===== -->
+<section class="slide sc-trans" data-title="Subnetting: الطريقة" data-steps="4">
+  <header class="sh"><div class="eb r l">07 · SUBNETTING</div><h2 class="r l">ثلاث خطوات للتقسيم</h2><div class="ul"></div></header>
+  <div class="body" style="flex-direction:row;gap:50px;align-items:flex-start">
+    <div class="msteps">
+      <div class="ms k-app r rt" data-s="1"><span class="num">1</span><div><b>كم شبكة تحتاج؟</b><p><span class="mono">2<sup>n</sup></span> ≥ العدد المطلوب</p><p class="res">4 شبكات ← <span class="mono">n = 2</span></p></div></div>
+      <div class="ms k-trans r rt" data-s="2"><span class="num">2</span><div><b>أضف n إلى الـ Prefix</b><p><span class="mono">/24 + 2</span></p><p class="res">الماسك الجديد <span class="mono">/26</span></p></div></div>
+      <div class="ms k-net r rt" data-s="3"><span class="num">3</span><div><b>احسب الأجهزة</b><p><span class="mono">2<sup>32 − prefix</sup> − 2</span></p><p class="res"><span class="mono">64 − 2 = 62</span> جهازًا لكل شبكة</p></div></div>
+    </div>
+    <div class="cheat r l" data-s="4">
+      <div class="ch hd"><span>Prefix</span><span>Mask</span><span>أجهزة</span></div>
+      <div class="ch"><span class="mono">/24</span><span class="mono">255.255.255.0</span><span class="mono">254</span></div>
+      <div class="ch"><span class="mono">/25</span><span class="mono">255.255.255.128</span><span class="mono">126</span></div>
+      <div class="ch hl"><span class="mono">/26</span><span class="mono">255.255.255.192</span><span class="mono">62</span></div>
+      <div class="ch"><span class="mono">/27</span><span class="mono">255.255.255.224</span><span class="mono">30</span></div>
+      <div class="ch"><span class="mono">/28</span><span class="mono">255.255.255.240</span><span class="mono">14</span></div>
+      <div class="ch"><span class="mono">/29</span><span class="mono">255.255.255.248</span><span class="mono">6</span></div>
+      <div class="ch"><span class="mono">/30</span><span class="mono">255.255.255.252</span><span class="mono">2</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 19 SUBNET CALC ===== -->
+<section class="slide sc-trans live" data-title="Subnetting: الحاسبة" data-steps="0">
+  <header class="sh"><div class="eb r l">07 · SUBNETTING · LIVE</div><h2 class="r l">حاسبة Subnet</h2><div class="ul"></div></header>
+  <div class="body" style="gap:30px;justify-content:center">
+    <div class="field">
+      <label for="c-ip">عنوان IP<input id="c-ip" type="text" value="192.168.1.77" inputmode="decimal" autocomplete="off" spellcheck="false"></label>
+      <label for="c-pfx">Prefix (0–32)<input id="c-pfx" class="sm" type="number" min="0" max="32" value="26"></label>
+    </div>
+    <div id="c-out" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ===== 20 CIDR ===== -->
+<section class="slide sc-trans" data-title="CIDR" data-steps="5" data-hook="cidr">
+  <header class="sh"><div class="eb r l">08 · CIDR</div><h2 class="r l">اختر الحجم الذي تحتاجه</h2><div class="ul"></div></header>
+  <div class="body" style="gap:22px;justify-content:center">
+    <p class="lead2 r" data-s="0" data-e="0">قديمًا: ثلاثة أحجام ثابتة فقط (/8 و/16 و/24). الآن: أي حجم، يُكتب بعد شرطة مائلة.</p>
+    <div class="cdtop r" data-s="1">
+      <div class="pfx"><span class="mono" id="cd-pfx">/24</span></div>
+      <svg class="aw" viewBox="0 0 160 40"><path d="M150 20H30" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M44 6L24 20l20 14" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      <div class="cdst"><div><small>الماسك</small><b class="mono" id="cd-mask"></b></div><div><small>كل العناوين</small><b class="mono" id="cd-tot"></b></div><div><small>أجهزة صالحة</small><b class="mono" id="cd-use"></b></div></div>
+    </div>
+    <div class="cells r" data-s="1" dir="ltr" id="cd-cells"></div>
+    <p class="legend r" data-s="1"><span><i class="sw" style="background:var(--l-net)"></i>بتات الشبكة</span><span><i class="sw" style="background:var(--l-trans)"></i>بتات الأجهزة</span></p>
+  </div>
+</section>
+
+<!-- ===== 21 CIDR SUMMARIZATION ===== -->
+<section class="slide sc-trans" data-title="CIDR: تجميع المسارات" data-steps="3">
+  <header class="sh"><div class="eb r l">08 · CIDR</div><h2 class="r l">تجميع المسارات</h2><div class="ul"></div></header>
+  <div class="body" style="gap:18px;justify-content:center">
+    <div class="sumtbl" dir="ltr" data-cls="2-9:hl">
+      <div class="sr r" data-s="1"><span class="mono">192.168.0.0/24</span><span class="mono bn">192.168.<em>000000</em>00.0</span></div>
+      <div class="sr r" data-s="1"><span class="mono">192.168.1.0/24</span><span class="mono bn">192.168.<em>000000</em>01.0</span></div>
+      <div class="sr r" data-s="1"><span class="mono">192.168.2.0/24</span><span class="mono bn">192.168.<em>000000</em>10.0</span></div>
+      <div class="sr r" data-s="1"><span class="mono">192.168.3.0/24</span><span class="mono bn">192.168.<em>000000</em>11.0</span></div>
+    </div>
+    <div class="note r fade" data-s="2">أول <b>22 بتًا</b> متطابقة في الأربع شبكات: 8 + 8 + 6</div>
+    <svg class="dn r" data-s="3" viewBox="0 0 60 70"><path d="M30 6V50" stroke="currentColor" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M12 36l18 20 18-20" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <div class="sumres r pop" data-s="3" dir="ltr"><span class="mono">192.168.0.0/22</span><small>4 مسارات ← مسار واحد</small></div>
+  </div>
+</section>
+
+<!-- ===== 22 ROUTING TOPOLOGY ===== -->
+<section class="slide sc-net" data-title="Routing: الراوتر" data-steps="4">
+  <header class="sh"><div class="eb r l">09 · ROUTING</div><h2 class="r l">الراوتر يربط الشبكات</h2><div class="ul"></div></header>
+  <div class="body" style="position:absolute"><svg class="dg" viewBox="0 0 1700 600" data-d="route"></svg></div>
+  <div class="capwrap">
+    <div class="cap r" data-s="0" data-e="0">مثل لافتات الطرق في التقاطع: الراوتر يعرف أي طريق يؤدي إلى أي شبكة.</div>
+    <div class="cap r" data-s="1" data-e="1">A يريد مراسلة <span class="mono">192.168.2.20</span>. هل الهدف في شبكتي؟ <b>لا</b> ← أرسل إلى الـ Gateway.</div>
+    <div class="cap r" data-s="2" data-e="2">الحزمة تصل إلى الراوتر.</div>
+    <div class="cap r" data-s="3" data-e="3">الراوتر يبحث في جدول التوجيه ويجد الشبكة 192.168.2.0/24 خلف المنفذ eth1.</div>
+    <div class="cap r" data-s="4">الراوتر يرسل الحزمة إلى B. وصلت.</div>
+  </div>
+</section>
+
+<!-- ===== 23 ROUTING TABLE ===== -->
+<section class="slide sc-net" data-title="Routing: جدول التوجيه" data-steps="3">
+  <header class="sh"><div class="eb r l">09 · ROUTING</div><h2 class="r l">أي مسار يختاره الراوتر؟</h2><div class="ul"></div></header>
+  <div class="body" style="flex-direction:row;gap:50px;align-items:flex-start">
+    <div class="rt-wrap">
+      <div class="dest r" data-s="1">الهدف: <span class="mono">192.168.2.55</span></div>
+      <div class="rtt" dir="ltr">
+        <div class="rr hd"><span>Network</span><span>Next hop</span><span></span></div>
+        <div class="rr r" data-s="0" data-cls="2-9:hit;3-9:win"><span class="mono">192.168.2.0/24</span><span class="mono">10.0.0.2</span><em>الأدق</em></div>
+        <div class="rr r" data-s="0" data-cls="2-9:hit"><span class="mono">192.168.0.0/16</span><span class="mono">10.0.0.3</span><em></em></div>
+        <div class="rr r" data-s="0" data-cls="2-9:dim"><span class="mono">192.168.1.0/24</span><span class="mono">Connected</span><em></em></div>
+        <div class="rr r" data-s="0" data-cls="2-9:dim"><span class="mono">10.0.0.0/30</span><span class="mono">Connected</span><em></em></div>
+        <div class="rr r" data-s="0" data-cls="2-9:hit"><span class="mono">0.0.0.0/0</span><span class="mono">10.0.0.1</span><em></em></div>
+      </div>
+      <div class="note r fade" data-s="2" data-e="2">ثلاثة مسارات تطابق العنوان</div>
+      <div class="note r fade" data-s="3">يفوز الأطول Prefix لأنه الأدق (Longest Prefix Match)</div>
+    </div>
+    <div class="types">
+      <div class="card k-app r rt" data-s="3"><h3>Static</h3><p>يدويًا</p></div>
+      <div class="card k-trans r rt" data-s="3"><h3>Dynamic</h3><p>RIP · OSPF · BGP</p></div>
+      <div class="card k-net r rt" data-s="3"><h3>Default</h3><p class="mono">0.0.0.0/0</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 24 SWITCHING ===== -->
+<section class="slide sc-link" data-title="Switching: السويتش يتعلم" data-steps="3">
+  <header class="sh"><div class="eb r l">10 · SWITCHING</div><h2 class="r l">السويتش يتعلم ويتذكر</h2><div class="ul"></div></header>
+  <div class="body" style="position:absolute;flex-direction:row;gap:50px;align-items:flex-start">
+    <svg class="dg" style="width:1100px;flex:none" viewBox="0 0 1100 600" data-d="sw"></svg>
+    <div class="mactbl r l" data-s="0">
+      <div class="th">MAC Address Table</div>
+      <div class="tr hd"><span>MAC</span><span>Port</span></div>
+      <div class="tr r l" data-s="1"><span class="mono">…:0A</span><span class="mono">1</span><em>تعلّم</em></div>
+      <div class="tr r l" data-s="2"><span class="mono">…:0C</span><span class="mono">3</span><em>تعلّم</em></div>
+    </div>
+  </div>
+  <div class="capwrap">
+    <div class="cap r" data-s="0" data-e="0">السويتش في البداية لا يعرف مكان أي جهاز. جدوله فارغ.</div>
+    <div class="cap r" data-s="1" data-e="1">A يرسل إلى C. السويتش <b>يتعلم</b> مكان A، ولا يعرف C فيرسل الإطار <b>للجميع (Flood)</b>.</div>
+    <div class="cap r" data-s="2" data-e="2">C يرد على A. السويتش <b>يتعلم</b> مكان C، ويعرف A فيرسل إليه <b>وحده</b>.</div>
+    <div class="cap r" data-s="3">A يرسل إلى C مرة أخرى: السويتش يعرف المكان ويمرر الإطار إلى C <b>فقط (Forward)</b>.</div>
+  </div>
+</section>
+
+<!-- ===== 25 HUB / SWITCH / ROUTER ===== -->
+<section class="slide sc-link" data-title="Hub وSwitch وRouter" data-steps="4">
+  <header class="sh"><div class="eb r l">10 · SWITCHING</div><h2 class="r l">Hub أم Switch أم Router؟</h2><div class="ul"></div></header>
+  <div class="body" style="gap:26px">
+    <div class="three">
+      <div class="card k-phys r" data-s="1"><svg class="ic"><use href="#i-hub"/></svg><h3>Hub</h3><span class="chip">طبقة 1</span><p>يكرر كل إشارة لكل المنافذ، بلا ذكاء.</p></div>
+      <div class="card k-link r" data-s="2"><svg class="ic"><use href="#i-switch"/></svg><h3>Switch</h3><span class="chip">طبقة 2</span><p>يعتمد على MAC ويرسل للمنفذ الصحيح داخل شبكة واحدة.</p></div>
+      <div class="card k-net r" data-s="3"><svg class="ic"><use href="#i-router"/></svg><h3>Router</h3><span class="chip">طبقة 3</span><p>يعتمد على IP ويربط شبكات مختلفة.</p></div>
+    </div>
+    <div class="callout r pop" data-s="4">كل منفذ في السويتش <b>Collision Domain</b> مستقل، لكن كل المنافذ <b>Broadcast Domain</b> واحد، إلا إذا قسمناه بـ VLAN.</div>
+  </div>
+</section>
+
+<!-- ===== 26 VLAN ===== -->
+<section class="slide sc-app" data-title="VLAN: سويتش واحد وشبكتان" data-steps="4">
+  <header class="sh"><div class="eb r l">11 · VLAN</div><h2 class="r l">سويتش واحد، شبكتان منفصلتان</h2><div class="ul"></div></header>
+  <div class="body" style="position:absolute"><svg class="dg" viewBox="0 0 1700 600" data-d="vlan"></svg></div>
+  <div class="capwrap">
+    <div class="cap r" data-s="0" data-e="0">قاعة واحدة وضعنا فيها حواجز فصارت غرفتين. الأجهزة لا تسمع أصوات الغرفة الأخرى.</div>
+    <div class="cap r" data-s="1" data-e="1">بدون VLAN: كل الأجهزة شبكة واحدة، والبث يصل إلى الجميع.</div>
+    <div class="cap r" data-s="2" data-e="2">نقسم المنافذ: <b>VLAN 10</b> للمبيعات و<b>VLAN 20</b> للمحاسبة.</div>
+    <div class="cap r" data-s="3" data-e="3">البث من PC1 يصل إلى <b>VLAN 10 فقط</b>. المحاسبة لا تسمعه.</div>
+    <div class="cap r" data-s="4">للتواصل بين VLANs نحتاج <b>راوترًا</b> (Inter-VLAN Routing).</div>
+  </div>
+</section>
+
+<!-- ===== 27 VLAN TRUNK ===== -->
+<section class="slide sc-app" data-title="VLAN: Trunk والوسم" data-steps="3">
+  <header class="sh"><div class="eb r l">11 · VLAN</div><h2 class="r l">Trunk: كابل واحد لعدة VLANs</h2><div class="ul"></div></header>
+  <div class="body" style="gap:10px">
+    <svg class="dg" viewBox="0 0 1700 460" data-d="trunk"></svg>
+    <div class="tagrow r" data-s="3">
+      <div class="tagf" dir="ltr"><span>Dest MAC</span><span>Src MAC</span><span class="t r dn" data-s="3" style="--d:.5s">802.1Q Tag · 4 bytes</span><span>Type</span><span>Data</span><span>FCS</span></div>
+      <p class="note">الوسم يحمل رقم الـ VLAN في 12 بت، فالأرقام المتاحة من <span class="mono">1</span> إلى <span class="mono">4094</span>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 28 NAT ===== -->
+<section class="slide sc-net" data-title="NAT: ترجمة العناوين" data-steps="4">
+  <header class="sh"><div class="eb r l">12 · NAT</div><h2 class="r l">NAT: سنترال بيتك</h2><div class="ul"></div></header>
+  <div class="body" style="gap:8px">
+    <svg class="dg" viewBox="0 0 1700 490" data-d="nat"></svg>
+    <div class="natrow">
+      <div class="nattbl">
+        <div class="tr hd"><span>Inside local</span><span>Inside global</span></div>
+        <div class="tr r l" data-s="2"><span class="mono">192.168.1.10:51000</span><span class="mono">203.0.113.5:40001</span></div>
+        <div class="tr r l" data-s="3"><span class="mono">192.168.1.11:51000</span><span class="mono">203.0.113.5:40002</span></div>
+      </div>
+      <div class="natcap">
+        <div class="r" data-s="0" data-e="1">كل أجهزة بيتك لها عناوين خاصة، والراوتر يخرجها بعنوان عام واحد.</div>
+        <div class="r" data-s="2" data-e="2">الراوتر يبدّل المصدر ويسجل الترجمة في الجدول.</div>
+        <div class="r" data-s="3" data-e="3">نفس المنفذ المحلي <span class="mono">51000</span>، لكن <b>منفذ عام مختلف</b> لكل جهاز.</div>
+        <div class="r" data-s="4">عند عودة الرد يبحث الراوتر في الجدول ويعيده للجهاز الصحيح.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 29 NAT TYPES ===== -->
+<section class="slide sc-net" data-title="NAT: الأنواع والحماية" data-steps="4">
+  <header class="sh"><div class="eb r l">12 · NAT</div><h2 class="r l">أنواع NAT ولماذا هو حاجز</h2><div class="ul"></div></header>
+  <div class="body" style="gap:26px">
+    <div class="three">
+      <div class="card k-app r" data-s="1"><h3>Static NAT</h3><p>عنوان خاص مقابل عنوان عام ثابت. مناسب للسيرفرات.</p></div>
+      <div class="card k-trans r" data-s="2"><h3>Dynamic NAT</h3><p>مجموعة عناوين عامة، يأخذ منها الجهاز عنوانًا وقت الحاجة.</p></div>
+      <div class="card k-net r" data-s="3"><h3>PAT · Overload</h3><p>عنوان عام واحد للجميع، والتفريق بأرقام المنافذ. الشائع في البيوت.</p></div>
+    </div>
+    <div class="shield r pop" data-s="4"><svg class="ic"><use href="#i-lock"/></svg><div><b>لماذا لا يدخل أحد من الإنترنت إلى جهازي؟</b><p>الاتصال القادم من الخارج لا يجد مدخلًا في جدول NAT فيرفضه الراوتر. للسماح به نضيف قاعدة <span class="mono">Port Forwarding</span>.</p></div></div>
+  </div>
+</section>
+
+<!-- ===== 30 SUMMARY ===== -->
+<section class="slide sc-app" data-title="ملخص الطبقات" data-steps="4">
+  <header class="sh"><div class="eb r l">SUMMARY</div><h2 class="r l">كل موضوع في أي طبقة؟</h2><div class="ul"></div></header>
+  <div class="body" style="gap:12px">
+    <div class="sm hd r" data-s="0"><span>الطبقة</span><span>الموضوعات</span><span>وحدة البيانات</span><span>العنوان</span><span>الجهاز</span></div>
+    <div class="sm k-app r rt" data-s="1"><b class="mono">7</b><span>HTTP · DNS · DHCP</span><span class="mono">Data</span><span>اسم الموقع</span><span>أجهزة طرفية</span></div>
+    <div class="sm k-trans r rt" data-s="2"><b class="mono">4</b><span>TCP · UDP</span><span class="mono">Segment</span><span>Port</span><span>Firewall</span></div>
+    <div class="sm k-net r rt" data-s="3"><b class="mono">3</b><span>IPv4 · IPv6 · Subnetting · CIDR · Routing · NAT</span><span class="mono">Packet</span><span>IP</span><span>Router</span></div>
+    <div class="sm k-link r rt" data-s="4"><b class="mono">2</b><span>MAC · ARP · Switching · VLAN</span><span class="mono">Frame</span><span>MAC</span><span>Switch</span></div>
+    <div class="sm k-phys r rt" data-s="4"><b class="mono">1</b><span>كابلات وإشارات</span><span class="mono">Bits</span><span>—</span><span>Hub · كابل</span></div>
+  </div>
+</section>
+
+<!-- ===== 31 JOURNEY ===== -->
+<section class="slide sc-trans" data-title="رحلة فتح موقع" data-steps="6">
+  <header class="sh"><div class="eb r l">THE BIG PICTURE</div><h2 class="r l">ماذا يحدث عندما تفتح موقعًا؟</h2><div class="ul"></div></header>
+  <div class="body" style="gap:34px">
+    <div class="jrow">
+      <div class="jc k-app r" data-s="1"><span class="n">1</span><svg class="ic"><use href="#i-cloud"/></svg><b>تعرف الـ IP</b><p>جهازك يسأل DNS عن عنوان الموقع.</p><span class="chip">DNS · UDP 53</span></div>
+      <i data-harr="2"></i>
+      <div class="jc k-link r" data-s="2"><span class="n">2</span><svg class="ic"><use href="#i-laptop"/></svg><b>يسأل عن الراوتر</b><p>الموقع في شبكة أخرى، فيسأل ARP عن MAC الـ Gateway.</p><span class="chip">ARP</span></div>
+      <i data-harr="3"></i>
+      <div class="jc k-trans r" data-s="3"><span class="n">3</span><svg class="ic"><use href="#i-lock"/></svg><b>يفتح اتصالًا</b><p>مصافحة TCP ثلاثية على المنفذ 443.</p><span class="chip">TCP · 443</span></div>
+    </div>
+    <div class="jrow">
+      <div class="jc k-link r" data-s="4"><span class="n">4</span><svg class="ic"><use href="#i-switch"/></svg><b>السويتش يمرر</b><p>يرسل الإطار إلى الراوتر حسب عنوان MAC.</p><span class="chip">Switching</span></div>
+      <i data-harr="5"></i>
+      <div class="jc k-net r" data-s="5"><span class="n">5</span><svg class="ic"><use href="#i-router"/></svg><b>الراوتر يترجم ويوجّه</b><p>يبدّل عنوانك الخاص بالعام ويختار المسار.</p><span class="chip">NAT · Routing</span></div>
+      <i data-harr="6"></i>
+      <div class="jc k-app r" data-s="6"><span class="n">6</span><svg class="ic"><use href="#i-server"/></svg><b>يعود الرد</b><p>السيرفر يرد، والراوتر يعيده إلى جهازك.</p><span class="chip">HTTP</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 32 END ===== -->
+<section class="slide sc-app" data-title="الختام" data-steps="0">
+  <svg class="bgnet" viewBox="0 0 1920 1080" data-d="bgnet" aria-hidden="true"></svg>
+  <div class="tt">
+    <div class="kick r l">THANK YOU</div>
+    <h1 class="r">شكرًا لكم</h1>
+    <div class="sub r">هل من أسئلة؟</div>
+    <div class="ul"></div>
+    <div class="endchips r">
+      <span class="chip k-app">OSI</span><span class="chip k-app">TCP/IP</span><span class="chip k-net">MAC</span><span class="chip k-net">ARP</span><span class="chip k-net">IPv4</span><span class="chip k-net">IPv6</span>
+      <span class="chip k-trans">Subnetting</span><span class="chip k-trans">CIDR</span><span class="chip k-link">Routing</span><span class="chip k-link">Switching</span><span class="chip k-link">VLAN</span><span class="chip k-link">NAT</span>
+    </div>
+  </div>
+</section>
+</div></div>
+<div class="bar">
+  <div class="rot">للعرض الأفضل، دوّر الجهاز إلى الوضع الأفقي.</div>
+  <div class="ctl" id="ctl">
+    <button class="nav" id="b-prev" type="button" aria-label="الشريحة السابقة">→</button>
+    <div class="trk"><i id="trk"></i></div>
+    <span id="cnt"></span>
+    <button class="nav" id="b-next" type="button" aria-label="التالي">←</button>
+    <button id="b-menu" type="button">القائمة (G)</button>
+    <button id="b-fs" type="button">ملء الشاشة (F)</button>
+  </div>
+</div>
+</div>
+<div class="menu" id="menu" role="dialog" aria-label="قائمة الشرائح"><h2>الشرائح</h2><div class="mg" id="mg"></div></div>
+
+<script>
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var C = { app: 'var(--l-app)', trans: 'var(--l-trans)', net: 'var(--l-net)', link: 'var(--l-link)', phys: 'var(--l-phys)', ink: 'var(--ink)', mut: 'var(--muted)', err: 'var(--err)' };
+
+  /* ---------- svg builders ---------- */
+  function ST(o, x) {
+    var p = [];
+    if (o.d != null) p.push('--d:' + o.d + 's');
+    if (x) p.push(x);
+    if (o.st) p.push(o.st);
+    return (o.s != null ? ' data-s="' + o.s + '"' : '') + (o.e != null ? ' data-e="' + o.e + '"' : '') + (o.cc ? ' data-cls="' + o.cc + '"' : '') + (p.length ? ' style="' + p.join(';') + '"' : '');
+  }
+  function IC(n, x, y, s, o) { o = o || {}; return '<g class="r pop ic"' + ST(o, o.c ? '--ic:' + o.c : '') + '><use href="#i-' + n + '" x="' + (x - s / 2) + '" y="' + (y - s / 2) + '" width="' + s + '" height="' + s + '"/></g>'; }
+  function TX(x, y, t, o) { o = o || {}; return '<text class="r fade' + (o.mono ? ' mono' : '') + '" x="' + x + '" y="' + y + '" text-anchor="' + (o.a || 'middle') + '"' + ST(o, (o.c ? '--fc:' + o.c + ';' : '') + 'font-size:' + (o.size || 34) + 'px' + (o.w ? ';font-weight:' + o.w : '')) + '>' + t + '</text>'; }
+  function LN(x1, y1, x2, y2, o) { o = o || {}; return '<line class="r fade ln" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"' + ST(o, (o.c ? 'stroke:' + o.c : '') + (o.w ? ';stroke-width:' + o.w : '')) + '/>'; }
+  function DL(x1, y1, x2, y2, o) { o = o || {}; return '<g class="fx"' + ST(o) + '><line class="draw" pathLength="1" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (o.c || C.app) + '" stroke-width="' + (o.w || 6) + '" stroke-linecap="round"/></g>'; }
+  function BX(x, y, w, h, o) { o = o || {}; return '<rect class="r pop bx" x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (o.r || 20) + '"' + ST(o, (o.bf ? '--bf:' + o.bf + ';' : '') + (o.bs ? '--bs:' + o.bs : '')) + '/>'; }
+  function RING(cx, cy, o) { o = o || {}; return '<circle class="ring" cx="' + cx + '" cy="' + cy + '" r="45"' + ST(o, '--rc:' + (o.c || C.app) + ';--rd:' + (o.rd || 0) + 's') + '/>'; }
+  function AR(x1, y1, x2, y2, o) {
+    o = o || {};
+    var dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, h = o.h || 28, hw = h * 0.55, px = -uy, py = ux, c = o.c || C.app;
+    var ex = x2 - ux * h * 0.8, ey = y2 - uy * h * 0.8;
+    var pts = [x2, y2, x2 - ux * h + px * hw, y2 - uy * h + py * hw, x2 - ux * h - px * hw, y2 - uy * h - py * hw].map(function (v) { return Math.round(v * 10) / 10; }).join(' ');
+    return '<g class="fx"' + ST(o) + '><line class="draw" pathLength="1" x1="' + x1 + '" y1="' + y1 + '" x2="' + ex + '" y2="' + ey + '" stroke="' + c + '" stroke-width="' + (o.w || 7) + '" stroke-linecap="round"/><polygon class="hd" points="' + pts + '" fill="' + c + '"/></g>';
+  }
+  function SL(cx, cy, x, y, up, o) {
+    var dx = x - cx, dy = y - cy, L = Math.hypot(dx, dy), nx = -dy / L * 14, ny = dx / L * 14;
+    var a = [cx + dx * .14 + nx, cy + dy * .14 + ny], b = [cx + dx * .86 + nx, cy + dy * .86 + ny];
+    return up ? AR(b[0], b[1], a[0], a[1], o) : AR(a[0], a[1], b[0], b[1], o);
+  }
+
+  var D = {};
+  D.bgnet = function () {
+    var N = [[200, 200, 'cloud', 130, C.app], [460, 140, 'router', 100, C.net], [640, 330, 'switch', 100, C.link], [330, 420, 'pc', 90, C.ink], [150, 600, 'laptop', 90, C.ink], [520, 640, 'server', 90, C.trans], [700, 780, 'pc', 80, C.ink], [300, 860, 'laptop', 80, C.ink], [560, 960, 'router', 80, C.net]];
+    var E = [[0, 1], [1, 2], [2, 3], [3, 4], [1, 3], [3, 5], [5, 6], [4, 7], [5, 8], [7, 8], [2, 5]], h = '';
+    E.forEach(function (e) { h += DL(N[e[0]][0], N[e[0]][1], N[e[1]][0], N[e[1]][1], { w: 3, c: 'var(--line)' }); });
+    N.forEach(function (n, i) { h += '<g class="nd" style="--fd:' + (i * .6) + 's">' + IC(n[2], n[0], n[1], n[3], { c: n[4] }) + '</g>'; });
+    return h;
+  };
+  D.osiarrows = function () {
+    return AR(55, 30, 55, 560, { s: 4, c: C.app, w: 8, h: 34 }) + TX(55, 615, 'الإرسال', { s: 4, size: 32, c: C.app }) +
+      AR(205, 560, 205, 30, { s: 4, c: C.trans, w: 8, h: 34, d: .5 }) + TX(200, 615, 'الاستقبال', { s: 4, size: 28, c: C.trans, d: .5 });
+  };
+  function flow(kind) {
+    var h = IC('pc', 80, 110, 100, { c: C.ink }) + IC('server', 700, 110, 100, { c: C.ink }), y = kind === 'tcp' ? 60 : 110, i;
+    h += LN(150, y, 640, y, {});
+    for (i = 0; i < 3; i++) h += '<rect class="pkt' + (kind === 'udp' && i === 2 ? ' lost' : '') + '" x="140" y="' + (y - 17) + '" width="34" height="34" rx="8" fill="' + (kind === 'tcp' ? C.app : C.net) + '" style="--pd:' + (i * 1.2) + 's"/>';
+    if (kind === 'tcp') {
+      h += LN(640, 165, 150, 165, {});
+      for (i = 0; i < 3; i++) h += '<circle class="ack" cx="600" cy="165" r="14" fill="' + C.trans + '" style="--pd:' + (0.9 + i * 1.2) + 's"/>';
+      h += TX(390, 212, 'ACK · تأكيد الاستلام', { size: 26, c: C.trans });
+    } else {
+      h += '<text class="xmark" x="385" y="128" text-anchor="middle" style="--pd:2.4s;font-size:54px;--fc:' + C.err + '">✕</text>' + TX(390, 180, 'جزء ضاع ولن يُعاد', { size: 26, c: C.err });
+    }
+    return h;
+  }
+  D.tcp = function () { return flow('tcp'); };
+  D.udp = function () { return flow('udp'); };
+  D.hand = function () {
+    var h = IC('pc', 150, 70, 100, { c: C.ink }) + IC('server', 750, 70, 100, { c: C.ink }) + TX(150, 150, 'Client', { size: 32, mono: 1 }) + TX(750, 150, 'Server', { size: 32, mono: 1 });
+    h += LN(150, 180, 150, 625, { w: 4 }) + LN(750, 180, 750, 625, { w: 4 });
+    h += AR(160, 270, 740, 270, { s: 1, c: C.app }) + TX(450, 240, '① SYN', { s: 1, size: 40, mono: 1, c: C.app }) + TX(450, 325, 'ممكن نتحدث؟', { s: 1, size: 32, c: C.mut });
+    h += AR(740, 450, 160, 450, { s: 2, c: C.trans }) + TX(450, 420, '② SYN-ACK', { s: 2, size: 40, mono: 1, c: C.trans }) + TX(450, 505, 'موافق، وأنا جاهز', { s: 2, size: 32, c: C.mut });
+    h += AR(160, 630, 740, 630, { s: 3, c: C.app }) + TX(450, 600, '③ ACK', { s: 3, size: 40, mono: 1, c: C.app });
+    return h;
+  };
+  D.mac = function () {
+    var h = BX(40, 10, 760, 340, { bs: C.trans, bf: 'var(--l-trans-s)', r: 30 }) + BX(900, 10, 760, 340, { bs: C.net, bf: 'var(--l-net-s)', r: 30 });
+    h += TX(420, 62, 'شبكة البيت', { c: C.trans, size: 40 }) + TX(1280, 62, 'شبكة المقهى', { c: C.net, size: 40 });
+    h += '<g class="mv" data-cls="2-9:mvd">' + IC('laptop', 420, 165, 170, { s: 1, c: C.ink }) +
+      TX(420, 272, 'MAC: 00:1A:2B:3C:4D:5E', { s: 1, mono: 1, size: 32, c: C.link, cc: '2-9:glow' }) +
+      TX(420, 322, 'IP: 192.168.1.10', { s: 1, e: 1, mono: 1, size: 32, c: C.net }) +
+      TX(420, 322, 'IP: 10.0.0.57', { s: 2, mono: 1, size: 32, c: C.net, d: 1 }) + '</g>';
+    return h;
+  };
+  D.cast = function (el) {
+    var v = el.dataset.v, h = IC('pc', 70, 125, 74, { c: C.link }), ys = [45, 125, 205], tg = v === 'u' ? [1] : v === 'm' ? [0, 2] : [0, 1, 2], i;
+    for (i = 0; i < 3; i++) {
+      var on = tg.indexOf(i) >= 0;
+      h += IC('pc', 440, ys[i], 62, { c: on ? (v === 'b' ? C.net : C.link) : C.mut, cc: on ? '' : '0-9:dim' });
+      if (on) h += AR(120, 125, 380, ys[i], { c: v === 'b' ? C.net : C.link, w: 6, h: 24, d: .4 + i * .25 });
+    }
+    return h;
+  };
+  D.arp = function () {
+    var xs = [250, 650, 1050, 1450], nm = ['A', 'B', 'C', 'D'], ip = ['192.168.1.10', '192.168.1.20', '192.168.1.30', '192.168.1.40'], h = '';
+    xs.forEach(function (x) { h += LN(850, 150, x, 355, {}); });
+    h += IC('switch', 850, 90, 120, { c: C.link });
+    xs.forEach(function (x, i) {
+      var cc = i === 1 ? '3-9:glow' : (i > 1 ? '3-9:dim' : '');
+      h += IC('pc', x, 410, 110, { c: i === 1 ? C.trans : (i === 0 ? C.app : C.ink), cc: cc });
+      h += TX(x, 500, nm[i], { size: 46, w: 700, cc: i > 1 ? '3-9:dim' : '' }) + TX(x, 545, ip[i], { mono: 1, size: 28, c: C.mut, cc: i > 1 ? '3-9:dim' : '' });
+    });
+    h += RING(250, 410, { s: 1, e: 1, c: C.app }) + RING(250, 410, { s: 1, e: 1, c: C.app, rd: 1.2 });
+    h += SL(850, 150, 250, 355, true, { s: 1, e: 2, c: C.app }) + TX(430, 205, 'Who has 192.168.1.20 ?', { s: 1, e: 2, mono: 1, size: 28, c: C.app });
+    xs.slice(1).forEach(function (x) { h += SL(850, 150, x, 355, false, { s: 2, e: 2, c: C.app }); });
+    h += TX(1100, 95, 'Broadcast: FF:FF:FF:FF:FF:FF', { s: 2, e: 2, a: 'start', mono: 1, size: 28, c: C.app });
+    h += TX(650, 595, 'هذا لي ✓', { s: 3, e: 3, c: C.trans, size: 36 }) + TX(1050, 595, 'ليس لي', { s: 3, e: 3, c: C.mut, size: 34 }) + TX(1450, 595, 'ليس لي', { s: 3, e: 3, c: C.mut, size: 34 });
+    h += SL(850, 150, 650, 355, true, { s: 4, c: C.trans }) + SL(850, 150, 250, 355, false, { s: 4, c: C.trans, d: .9 }) + TX(500, 160, '192.168.1.20 is at …0B', { s: 4, e: 4, mono: 1, size: 28, c: C.trans });
+    return h;
+  };
+  D.route = function () {
+    var h = IC('cloud', 850, 80, 140, { c: C.app }) + TX(960, 90, 'Internet', { a: 'start', size: 34, c: C.app }) + LN(850, 152, 850, 245, {});
+    h += LN(275, 330, 765, 330, {}) + LN(935, 330, 1425, 330, {});
+    h += IC('router', 850, 330, 170, { c: C.net }) + TX(850, 445, 'Router · Gateway', { size: 34, c: C.net }) + TX(660, 268, '192.168.1.1', { mono: 1, size: 26, c: C.mut }) + TX(1040, 268, '192.168.2.1', { mono: 1, size: 26, c: C.mut });
+    h += IC('pc', 200, 330, 150, { c: C.ink }) + TX(200, 440, 'PC A', { size: 36, w: 700 }) + TX(200, 482, '192.168.1.10', { mono: 1, size: 28, c: C.mut });
+    h += IC('pc', 1500, 330, 150, { c: C.ink }) + TX(1500, 440, 'PC B', { size: 36, w: 700 }) + TX(1500, 482, '192.168.2.20', { mono: 1, size: 28, c: C.mut });
+    h += TX(200, 560, 'شبكة 1 · 192.168.1.0/24', { c: C.trans, size: 32 }) + TX(1500, 560, 'شبكة 2 · 192.168.2.0/24', { c: C.link, size: 32 });
+    h += '<g class="mv" data-cls="2-3:p1;4-9:p2">' + IC('envelope', 330, 330, 84, { s: 1, c: C.net }) + '</g>';
+    h += BX(940, 190, 440, 100, { s: 3, e: 3, bs: C.net, bf: 'var(--l-net-s)' }) + TX(1160, 232, '192.168.2.0/24 → eth1', { s: 3, e: 3, mono: 1, size: 28, c: C.net }) + TX(1160, 272, 'تطابق ✓', { s: 3, e: 3, size: 28, c: C.trans });
+    return h;
+  };
+  D.sw = function () {
+    var xs = [140, 400, 700, 960], nm = ['A', 'B', 'C', 'D'], mc = ['…:0A', '…:0B', '…:0C', '…:0D'], h = '';
+    xs.forEach(function (x) { h += LN(550, 150, x, 350, {}); });
+    h += IC('switch', 550, 90, 120, { c: C.link });
+    xs.forEach(function (x, i) {
+      h += IC('pc', x, 400, 100, { c: i === 0 ? C.app : (i === 2 ? C.trans : C.ink), cc: (i === 1 || i === 3) ? '1-1:dim' : '' });
+      h += TX(x, 490, nm[i], { size: 44, w: 700 }) + TX(x, 530, mc[i], { mono: 1, size: 28, c: C.mut });
+    });
+    h += SL(550, 150, 140, 350, true, { s: 1, e: 1, c: C.app });
+    [400, 700, 960].forEach(function (x) { h += SL(550, 150, x, 350, false, { s: 1, e: 1, c: C.app }); });
+    h += TX(400, 585, 'يتجاهل', { s: 1, e: 1, size: 30, c: C.mut }) + TX(960, 585, 'يتجاهل', { s: 1, e: 1, size: 30, c: C.mut }) + TX(700, 585, 'المستلم ✓', { s: 1, e: 1, size: 32, c: C.trans });
+    h += SL(550, 150, 700, 350, true, { s: 2, e: 2, c: C.trans }) + SL(550, 150, 140, 350, false, { s: 2, e: 2, c: C.trans, d: .9 }) + TX(140, 585, 'المستلم ✓', { s: 2, e: 2, size: 32, c: C.trans });
+    h += SL(550, 150, 140, 350, true, { s: 3, c: C.app }) + SL(550, 150, 700, 350, false, { s: 3, c: C.app, d: .9 }) + TX(700, 585, 'المستلم ✓', { s: 3, size: 32, c: C.trans });
+    return h;
+  };
+  D.vlan = function () {
+    var xs = [190, 454, 718, 982, 1246, 1510], h = '', i;
+    xs.forEach(function (x) { h += LN(850, 160, x, 345, {}); });
+    h += IC('switch', 850, 100, 150, { c: C.link });
+    for (i = 0; i < 6; i++) {
+      var a = i < 3, cc = '1-1:glow;2-9:' + (a ? 'v10' : 'v20') + (a ? '' : ';3-3:dim');
+      h += IC('pc', xs[i], 400, 110, { cc: cc }) + TX(xs[i], 490, 'PC' + (i + 1), { size: 38, w: 700, cc: a ? '' : '3-3:dim' });
+    }
+    h += RING(850, 100, { s: 1, e: 1, c: C.net }) + RING(850, 100, { s: 1, e: 1, c: C.net, rd: 1.2 }) + RING(850, 100, { s: 3, e: 3, c: C.app }) + RING(850, 100, { s: 3, e: 3, c: C.app, rd: 1.2 });
+    h += TX(454, 575, 'VLAN 10 · مبيعات', { s: 2, c: C.app, size: 38 }) + TX(1246, 575, 'VLAN 20 · محاسبة', { s: 2, c: C.trans, size: 38, cc: '3-3:dim' });
+    h += IC('router', 1560, 100, 130, { s: 4, c: C.net }) + TX(1560, 190, 'Router', { s: 4, c: C.net, size: 34 }) + AR(930, 100, 1470, 100, { s: 4, c: C.net });
+    return h;
+  };
+  D.trunk = function () {
+    var h = '', pcs = [[170, 360, C.app, 300], [430, 360, C.trans, 300], [1270, 360, C.app, 1400], [1530, 360, C.trans, 1400]];
+    pcs.forEach(function (p, i) { h += LN(p[3], 195, p[0], 310, {}) + IC('pc', p[0], p[1], 100, { c: p[2] }) + TX(p[0], 440, 'PC' + (i + 1), { size: 30, c: C.mut }); });
+    h += IC('switch', 300, 120, 150, { c: C.link }) + IC('switch', 1400, 120, 150, { c: C.link });
+    h += DL(390, 105, 1310, 105, { s: 2, c: C.app, w: 10 }) + DL(390, 140, 1310, 140, { s: 2, c: C.trans, w: 10, d: .2 });
+    h += TX(850, 62, 'Trunk', { s: 2, size: 44, w: 700, c: C.ink }) + TX(850, 205, 'كابل واحد يحمل VLAN 10 و VLAN 20 معًا', { s: 2, size: 32, c: C.mut });
+    return h;
+  };
+  D.nat = function () {
+    var ys = [80, 235, 390], ips = ['192.168.1.10', '192.168.1.11', '192.168.1.12'], h = '';
+    ys.forEach(function (y, i) { h += LN(185, y, 715, 235, {}) + IC('pc', 130, y, 100, { c: C.ink }) + TX(130, y + 76, ips[i], { mono: 1, size: 26, c: C.mut }); });
+    h += LN(885, 235, 1425, 235, {});
+    h += IC('router', 800, 235, 170, { c: C.net }) + TX(800, 345, 'NAT Router', { size: 34, c: C.net, w: 700 }) + TX(800, 385, '203.0.113.5', { mono: 1, size: 30, c: C.net });
+    h += IC('server', 1500, 235, 150, { c: C.ink }) + TX(1500, 330, '198.51.100.7:443', { mono: 1, size: 30, c: C.mut });
+    h += AR(190, 95, 715, 215, { s: 1, e: 1, c: C.app }) + TX(480, 105, 'src 192.168.1.10:51000', { s: 1, e: 1, mono: 1, size: 28, c: C.app });
+    h += AR(885, 225, 1420, 225, { s: 2, e: 2, c: C.net }) + TX(1150, 190, 'src 203.0.113.5:40001', { s: 2, e: 2, mono: 1, size: 28, c: C.net });
+    h += AR(190, 235, 715, 235, { s: 3, e: 3, c: C.app }) + TX(450, 205, 'src 192.168.1.11:51000', { s: 3, e: 3, mono: 1, size: 28, c: C.app });
+    h += AR(885, 245, 1420, 245, { s: 3, e: 3, c: C.net }) + TX(1150, 295, 'src 203.0.113.5:40002', { s: 3, e: 3, mono: 1, size: 28, c: C.net });
+    h += AR(1420, 225, 885, 225, { s: 4, c: C.trans }) + TX(1150, 190, 'dst 203.0.113.5:40001', { s: 4, mono: 1, size: 28, c: C.trans });
+    h += AR(715, 215, 190, 95, { s: 4, c: C.trans, d: .8 }) + TX(480, 105, 'dst 192.168.1.10:51000', { s: 4, mono: 1, size: 28, c: C.trans, d: .8 });
+    return h;
+  };
+  function cellGroups(n, cls) { var h = '', i, g; for (g = 0; g < 4; g++) { h += '<span class="g">'; for (i = 0; i < 8; i++) h += '<i></i>'; h += '</span>'; } return h; }
+  D.strip24 = function () { var h = '', i, g, k = 0; for (g = 0; g < 4; g++) { h += '<span class="g">'; for (i = 0; i < 8; i++) { h += '<i class="' + (k < 24 ? 'n' : '') + '"></i>'; k++; } h += '</span>'; } return h; };
+
+  $$('[data-d]').forEach(function (el) { if (D[el.dataset.d]) el.innerHTML = D[el.dataset.d](el); });
+  $$('i[data-harr]').forEach(function (el) {
+    var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    s.setAttribute('class', 'harr fx'); s.setAttribute('viewBox', '0 0 120 40'); s.setAttribute('data-s', el.dataset.harr);
+    s.innerHTML = '<path class="draw" pathLength="1" d="M112 20H22"/><path class="hd" d="M38 6L18 20l20 14"/>';
+    el.parentNode.replaceChild(s, el);
+  });
+  var cdc = $('#cd-cells'); if (cdc) cdc.innerHTML = cellGroups();
+
+  /* ---------- engine ---------- */
+  $$('.cap, .natcap > div').forEach(function (c) { c.innerHTML = '<span class="cw">' + c.innerHTML + '</span>'; });
+  var slides = $$('.slide'), N = slides.length, cur = 0, step = 0, H = {};
+  var stage = $('#stage');
+  slides.forEach(function (sl) {
+    $$('.r,.fx,.ul', sl).forEach(function (e) {
+      if (e.getAttribute('data-s') == null) {
+        var p = e.parentElement && e.parentElement.closest('[data-s]');
+        if (p && sl.contains(p)) { e.setAttribute('data-s', p.getAttribute('data-s')); if (p.getAttribute('data-e') != null) e.setAttribute('data-e', p.getAttribute('data-e')); }
+        else e.setAttribute('data-s', '0');
+      }
+    });
+    var cnt = {};
+    $$('[data-s]', sl).forEach(function (e) {
+      if (e.style.getPropertyValue('--d')) return;
+      var s = e.getAttribute('data-s'); cnt[s] = cnt[s] || 0;
+      e.style.setProperty('--d', Math.min(cnt[s] * .07, .9).toFixed(2) + 's'); cnt[s]++;
+    });
+  });
+  function steps(sl) { return +sl.dataset.steps || 0; }
+  function apply(sl, st) {
+    $$('[data-s]', sl).forEach(function (e) {
+      var s = +e.getAttribute('data-s'), en = e.getAttribute('data-e') != null ? +e.getAttribute('data-e') : 99;
+      e.classList.toggle('on', st >= s && st <= en);
+    });
+    $$('[data-cls]', sl).forEach(function (e) {
+      e.getAttribute('data-cls').split(';').forEach(function (p) {
+        var m = p.match(/^(\d+)(?:-(\d+))?:(.+)$/); if (!m) return;
+        e.classList.toggle(m[3], st >= +m[1] && st <= (m[2] ? +m[2] : 99));
+      });
+    });
+    if (sl.dataset.hook && H[sl.dataset.hook]) H[sl.dataset.hook](st, sl);
+  }
+  function ui() {
+    $('#cnt').textContent = (cur + 1) + ' / ' + N;
+    $('#trk').style.width = ((cur + 1) / N * 100) + '%';
+    $('#b-prev').disabled = cur === 0 && step === 0; $('#b-next').disabled = cur === N - 1 && step === steps(slides[cur]);
+    $$('#mg button').forEach(function (b, k) { b.classList.toggle('cur', k === cur); });
+    try { history.replaceState(null, '', '#s' + (cur + 1)); } catch (e) {}
+  }
+  var timer = null;
+  function show(i, st) {
+    i = Math.max(0, Math.min(N - 1, i));
+    var changed = i !== cur || !slides[i].classList.contains('active');
+    cur = i; step = st;
+    slides.forEach(function (s, k) { s.classList.toggle('active', k === i); s.classList.toggle('before', k < i); s.classList.toggle('after', k > i); });
+    var sl = slides[i];
+    if (changed) { $$('.on', sl).forEach(function (e) { e.classList.remove('on'); }); void sl.offsetWidth; clearTimeout(timer); timer = setTimeout(function () { apply(sl, step); }, 90); }
+    else apply(sl, step);
+    ui();
+  }
+  function next() { var sl = slides[cur]; if (step < steps(sl)) { step++; apply(sl, step); ui(); } else if (cur < N - 1) show(cur + 1, 0); }
+  function prev() { if (step > 0) { step--; apply(slides[cur], step); ui(); } else if (cur > 0) show(cur - 1, steps(slides[cur - 1])); }
+
+  /* hooks + live widgets */
+  var CD = [null, 8, 16, 24, 27, 30];
+  function fmt(n) { return [n >>> 24, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.'); }
+  function maskOf(p) { return p === 0 ? 0 : (0xFFFFFFFF << (32 - p)) >>> 0; }
+  function parseIP(s) { var p = String(s).trim().split('.'); if (p.length !== 4) return null; var n = 0; for (var i = 0; i < 4; i++) { if (!/^\d{1,3}$/.test(p[i])) return null; var v = +p[i]; if (v > 255) return null; n = n * 256 + v; } return n; }
+  function num(n) { return n.toLocaleString('en-US'); }
+  H.cidr = function (st) {
+    if (st < 1) return; var p = CD[st], tot = Math.pow(2, 32 - p);
+    $('#cd-pfx').textContent = '/' + p;
+    $$('#cd-cells i').forEach(function (c, i) { c.className = i < p ? 'n' : ''; });
+    $('#cd-mask').textContent = fmt(maskOf(p)); $('#cd-tot').textContent = num(tot); $('#cd-use').textContent = num(tot - 2);
+  };
+  var bits = [0, 0, 0, 0, 0, 0, 0, 0], vals = [128, 64, 32, 16, 8, 4, 2, 1], tg = $('#tg');
+  vals.forEach(function (v, i) { var b = document.createElement('button'); b.type = 'button'; b.setAttribute('aria-pressed', 'false'); b.innerHTML = '<small>' + v + '</small><b>0</b>'; b.addEventListener('click', function () { bits[i] = bits[i] ? 0 : 1; drawBits(); }); tg.appendChild(b); });
+  function drawBits() {
+    var sum = 0, parts = [];
+    $$('button', tg).forEach(function (b, i) { b.setAttribute('aria-pressed', bits[i] ? 'true' : 'false'); $('b', b).textContent = bits[i]; if (bits[i]) { sum += vals[i]; parts.push(vals[i]); } });
+    $('#tg-sum').innerHTML = (parts.length ? parts.join(' + ') : '0') + ' = <b>' + sum + '</b>';
+  }
+  function setNum(n) { bits = vals.map(function (v) { var r = n >= v; if (r) n -= v; return r ? 1 : 0; }); drawBits(); }
+  [['192', 192], ['168', 168], ['255', 255], ['10', 10], ['صفّر', 0]].forEach(function (p) { var b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = p[0]; b.addEventListener('click', function () { setNum(p[1]); }); $('#tg-pre').appendChild(b); });
+  setNum(192);
+  function renderIPv4() {
+    var out = $('#ip-out'), v = parseIP($('#ip-in').value);
+    if (v === null) { out.innerHTML = '<p class="err">اكتب أربعة أرقام بين 0 و255 تفصل بينها نقطة.</p>'; return; }
+    out.innerHTML = '<div class="octs">' + fmt(v).split('.').map(function (p) { return '<div class="oct"><span class="dec">' + p + '</span><span class="bin">' + (+p).toString(2).padStart(8, '0') + '</span></div>'; }).join('') + '</div>';
+  }
+  $('#ip-in').addEventListener('input', renderIPv4); renderIPv4();
+  function renderCalc() {
+    var out = $('#c-out'), ip = parseIP($('#c-ip').value), raw = $('#c-pfx').value, p = /^\d{1,2}$/.test(raw) ? parseInt(raw, 10) : -1;
+    if (ip === null || p < 0 || p > 32) { out.innerHTML = '<p class="err">اكتب عنوان IP صحيحًا وPrefix بين 0 و32.</p>'; return; }
+    var m = maskOf(p), net = (ip & m) >>> 0, bc = (net | (~m >>> 0)) >>> 0, total = Math.pow(2, 32 - p), first, last, usable;
+    if (p === 32) { first = last = net; usable = 1; } else if (p === 31) { first = net; last = bc; usable = 2; } else { first = net + 1; last = bc - 1; usable = total - 2; }
+    var rows = [['Network ID', fmt(net) + '/' + p], ['Subnet mask', fmt(m)], ['Broadcast', p >= 31 ? '—' : fmt(bc)], ['كل العناوين', num(total)], ['أول جهاز', fmt(first)], ['آخر جهاز', fmt(last)], ['أجهزة صالحة', num(usable)]];
+    var b = (ip >>> 0).toString(2).padStart(32, '0'), bh = '';
+    for (var i = 0; i < 32; i++) { if (i && i % 8 === 0) bh += '<span style="color:var(--muted)">.</span>'; bh += '<span style="color:' + (i < p ? 'var(--l-net)' : 'var(--l-trans)') + '">' + b.charAt(i) + '</span>'; }
+    out.innerHTML = '<dl class="kv">' + rows.map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('') + '</dl><div class="bitsrow">' + bh + '</div><p class="legend" style="margin-top:14px"><span><i class="sw" style="background:var(--l-net)"></i>بتات الشبكة</span><span><i class="sw" style="background:var(--l-trans)"></i>بتات الأجهزة</span></p>';
+  }
+  $('#c-ip').addEventListener('input', renderCalc); $('#c-pfx').addEventListener('input', renderCalc); renderCalc();
+
+  /* ---------- fit, input, menu ---------- */
+  function fit() { var w = $('#sw').clientWidth - 32, h = $('#sw').clientHeight - 12; stage.style.setProperty('--s', Math.max(Math.min(w / 1920, h / 1080), .05)); }
+  window.addEventListener('resize', fit); fit();
+  var mg = $('#mg');
+  slides.forEach(function (sl, i) { var b = document.createElement('button'); b.type = 'button'; b.innerHTML = '<b>' + (i + 1) + '</b>' + sl.dataset.title; b.addEventListener('click', function () { closeMenu(); show(i, 0); }); mg.appendChild(b); });
+  function openMenu() { $('#menu').classList.add('open'); var c = $('#mg button.cur'); if (c) c.focus(); }
+  function closeMenu() { $('#menu').classList.remove('open'); }
+  function toggleMenu() { if ($('#menu').classList.contains('open')) closeMenu(); else openMenu(); }
+  function fs() { try { if (document.fullscreenElement) document.exitFullscreen(); else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {}); } catch (e) {} }
+  document.addEventListener('fullscreenchange', function () { setTimeout(fit, 120); });
+  $('#b-next').addEventListener('click', next); $('#b-prev').addEventListener('click', prev); $('#b-menu').addEventListener('click', toggleMenu); $('#b-fs').addEventListener('click', fs);
+  $('#menu').addEventListener('click', function (e) { if (e.target.id === 'menu') closeMenu(); });
+  document.addEventListener('keydown', function (e) {
+    var t = e.target, tag = t && t.tagName;
+    if (/INPUT|SELECT|TEXTAREA/.test(tag) || e.ctrlKey || e.metaKey || e.altKey) return;
+    var menuOpen = $('#menu').classList.contains('open'), k = e.key, h = true;
+    if (k === 'Escape') { closeMenu(); return; }
+    if (k === 'g' || k === 'G') toggleMenu();
+    else if (menuOpen) return;
+    else if ((k === ' ' || k === 'Enter') && tag === 'BUTTON') return;
+    else if (k === 'ArrowLeft' || k === 'ArrowDown' || k === 'PageDown' || k === ' ' || k === 'Enter') next();
+    else if (k === 'ArrowRight' || k === 'ArrowUp' || k === 'PageUp' || k === 'Backspace') prev();
+    else if (k === 'Home') show(0, 0);
+    else if (k === 'End') show(N - 1, 0);
+    else if (k === 'f' || k === 'F') fs();
+    else h = false;
+    if (h) e.preventDefault();
+  });
+  var sx = 0, sy = 0, st0 = false;
+  stage.addEventListener('pointerdown', function (e) { st0 = !e.target.closest('button,input,select,a,label'); sx = e.clientX; sy = e.clientY; });
+  stage.addEventListener('pointerup', function (e) {
+    if (!st0) return; var dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) > 60 && Math.abs(dy) < 90) { if (dx < 0) next(); else prev(); }
+    else if (Math.abs(dx) < 8 && Math.abs(dy) < 8 && !slides[cur].classList.contains('live') && !String(window.getSelection && window.getSelection()).length) next();
+    st0 = false;
+  });
+  var idle = null, vp = $('#vp');
+  function wake() { vp.classList.remove('idle'); clearTimeout(idle); idle = setTimeout(function () { if (document.fullscreenElement) vp.classList.add('idle'); }, 2800); }
+  document.addEventListener('pointermove', wake); wake();
+
+  var m0 = /^#s(\d+)$/.exec(location.hash), start = m0 ? Math.max(1, Math.min(N, +m0[1])) - 1 : 0;
+  show(start, 0);
+})();
+</script>
+
+</body></html>
